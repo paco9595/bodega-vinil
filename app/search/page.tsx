@@ -1,0 +1,20 @@
+import SearchInterface from '@/components/SearchInterface'
+
+export default function SearchPage() {
+    return (
+        <div className="min-h-screen bg-background">
+            <main className="container mx-auto px-4 py-8">
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+                        Find Your Records
+                    </h1>
+                    <p className="text-muted-foreground text-lg">
+                        Search the Discogs database to add to your collection
+                    </p>
+                </div>
+
+                <SearchInterface />
+            </main>
+        </div>
+    )
+}

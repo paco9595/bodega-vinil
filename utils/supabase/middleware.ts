@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
     if (
         !user &&
         !request.nextUrl.pathname.startsWith('/auth') &&
-        request.nextUrl.pathname !== '/'
+        request.nextUrl.pathname !== '/' &&
+        !(request.nextUrl.pathname.startsWith('/wishList') && request.nextUrl.searchParams.has('token'))
     ) {
         // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone()

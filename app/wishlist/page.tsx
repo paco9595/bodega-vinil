@@ -1,28 +1,59 @@
+'use client'
 import VinylTable from "@/components/VinylTable"
-import { createClient } from "@/utils/supabase/server"
-import { redirect } from "next/navigation"
+import { redirect, useSearchParams } from "next/navigation"
+import ShareModal from "@/components/ShareModal"
+import { createClient } from "@/utils/supabase/client"
+import { useEffect, useState } from "react"
 
-export default async function WishListPage() {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+export default function WishListPage() {
+    const [vinyls, setVinyls] = useState([])
+    const query = useSearchParams()
+    const token = query.get('token')
+    console.log(token)
+    const supabase = createClient()
 
-    if (!user) {
-        return redirect('/')
-    }
+    useEffect(() => {
+        const verifytAuth = async () => {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser()
 
-    const { data: vinyls } = await supabase
-        .from('vinyls')
-        .select('*')
-        .filter('owned', 'eq', false)
-        .order('created_at', { ascending: false })
+            if (!user) {
+                return redirect('/')
+            }
+
+            const { data } = await supabase
+                .from('vinyls')
+                .select('*')
+                .filter('owned', 'eq', false)
+                .order('created_at', { ascending: false })
+            setVinyls(data)
+        }
+
+        const verifytToken = async () => {
+            // hacer llamda get al magicLink con el token
+            const res = await fetch(`/api/magicLink?token=${token}`)
+            const data = await res.json()
+
+            console.log(data)
+            setVinyls(data || [])
+        }
+
+        if (!token) {
+            verifytAuth()
+        } else {
+            verifytToken()
+        }
+    }, [])
 
     return (
         <div>
-            <h1 className="text-3xl font-bold my-10">
-                Wish List
-            </h1>
+            <div className="flex items-center justify-between my-10">
+                <h1 className="text-3xl font-bold">
+                    Wish List
+                </h1>
+                <ShareModal />
+            </div>
             <VinylTable vinyls={vinyls || []} />
         </div>
     )

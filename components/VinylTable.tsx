@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { useState } from 'react'
 import { NormalizeString, NormalizeYear } from '@/utils/utilits'
 
@@ -11,6 +11,7 @@ interface Vinyl {
     title: string
     artist: string
     year: string | null
+    format: string
     cover_image: string | null
     discogs_id: number | null
 }
@@ -19,6 +20,19 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
+    const [sortColumn, setSortColumn] = useState<keyof Vinyl | null>(null)
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+    console.log('Vinyls', vinyls)
+
+    const handleSort = (column: keyof Vinyl) => {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortColumn(column)
+            setSortDirection('asc')
+        }
+    }
 
     const filteredVinyls = vinyls.filter((vinyl) => {
         const query = NormalizeString(searchQuery)
@@ -27,6 +41,19 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
             NormalizeString(vinyl.artist).includes(query) ||
             (NormalizeYear(vinyl.year || '').includes(query) ?? false)
         )
+    }).sort((a, b) => {
+        if (!sortColumn) return 0
+
+        const aValue = a[sortColumn]
+        const bValue = b[sortColumn]
+
+        if (aValue === bValue) return 0
+        if (aValue === null) return 1
+        if (bValue === null) return -1
+
+        const compareResult = aValue.toString().localeCompare(bValue.toString(), undefined, { numeric: true })
+
+        return sortDirection === 'asc' ? compareResult : -compareResult
     })
 
     // Reset to first page when search changes
@@ -37,6 +64,25 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
     const totalPages = Math.ceil(filteredVinyls.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
     const paginatedVinyls = filteredVinyls.slice(startIndex, startIndex + itemsPerPage)
+
+    const SortIcon = ({ column }: { column: keyof Vinyl }) => {
+        if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-2 opacity-50" />
+        return sortDirection === 'asc'
+            ? <ArrowUp className="w-4 h-4 ml-2 text-primary" />
+            : <ArrowDown className="w-4 h-4 ml-2 text-primary" />
+    }
+
+    const SortableHeader = ({ column, label, className = "" }: { column: keyof Vinyl, label: string, className?: string }) => (
+        <th
+            className={`p-4 cursor-pointer hover:bg-white/10 transition-colors select-none ${className}`}
+            onClick={() => handleSort(column)}
+        >
+            <div className="flex items-center">
+                {label}
+                <SortIcon column={column} />
+            </div>
+        </th>
+    )
 
     return (
         <div className="space-y-4">
@@ -89,9 +135,10 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                             <thead className="border-b border-white/10 bg-white/5 text-muted-foreground font-medium">
                                 <tr>
                                     <th className="p-4 w-20">Cover</th>
-                                    <th className="p-4">Title</th>
-                                    <th className="p-4">Artist</th>
-                                    <th className="p-4 w-24">Year</th>
+                                    <SortableHeader column="title" label="Title" />
+                                    <SortableHeader column="artist" label="Artist" />
+                                    <SortableHeader column="format" label="Format" />
+                                    <SortableHeader column="year" label="Year" className="w-24" />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -119,6 +166,7 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                                             </Link>
                                         </td>
                                         <td className="p-4">{vinyl.artist}</td>
+                                        <td className="p-4">{vinyl.format}</td>
                                         <td className="p-4">{vinyl.year || '-'}</td>
                                     </tr>
                                 ))}

@@ -16,6 +16,7 @@ export default async function DashboardPage() {
     const { data: vinyls } = await supabase
         .from('vinyls')
         .select('*')
+        .filter('owned', 'eq', true)
         .order('created_at', { ascending: false })
 
     return (

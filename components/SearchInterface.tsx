@@ -2,12 +2,15 @@
 
 import { addToCollection, searchVinyls } from '@/app/actions'
 import { DiscogsResult, DiscogsSearchResponse } from '@/lib/discogs'
-import { Disc, Loader2, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Disc, Loader2, Plus, Search, ChevronLeft, ChevronRight, Goal } from 'lucide-react'
 import Image from 'next/image'
+import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function SearchInterface() {
+    const navigate = useRouter()
     const [query, setQuery] = useState('')
+    const [format, setFormat] = useState('vinyl')
     const [results, setResults] = useState<DiscogsResult[]>([])
     const [pagination, setPagination] = useState({ page: 1, pages: 1 })
     const [loading, setLoading] = useState(false)
@@ -19,9 +22,10 @@ export default function SearchInterface() {
 
         setLoading(true)
         try {
-            console.log('Searching for', query, 'page', page)
+            console.log('Searching for', query, 'format', format, 'page', page)
             const formData = new FormData()
             formData.append('query', query)
+            formData.append('format', format)
             formData.append('page', page.toString())
 
             const data: DiscogsSearchResponse = await searchVinyls(formData)
@@ -34,19 +38,25 @@ export default function SearchInterface() {
         }
     }
 
-    const handleAdd = async (vinyl: DiscogsResult) => {
+    const handleAdd = async (vinyl: DiscogsResult, owned: boolean = true) => {
         setAddingId(vinyl.id)
         try {
-            // Extract artist and title from Discogs format "Artist - Title"
             const [artist, title] = vinyl.title.split(' - ').map((s) => s.trim())
 
             await addToCollection({
-                title: title || vinyl.title, // Fallback if split fails
+                title: title || vinyl.title,
                 artist: artist || 'Unknown Artist',
                 year: vinyl.year || '',
                 cover_image: vinyl.cover_image || vinyl.thumb || '',
                 discogs_id: vinyl.id,
+                owned,
             })
+
+            if (owned) {
+                navigate.push('/dashboard')
+            } else {
+                navigate.push('/wishlist')
+            }
         } catch (error) {
             console.error('Add failed', error)
             setAddingId(null)
@@ -55,19 +65,33 @@ export default function SearchInterface() {
 
     return (
         <div className="space-y-8">
-            <form onSubmit={(e) => handleSearch(e, 1)} className="relative max-w-2xl mx-auto">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search for artist, album, or track..."
-                    className="w-full h-14 pl-12 pr-4 rounded-full bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary text-lg transition-all"
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-6 h-6" />
+            <form onSubmit={(e) => handleSearch(e, 1)} className="relative max-w-2xl mx-auto flex gap-4">
+                <div className="relative flex-1">
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search for artist, album, or track..."
+                        className="w-full h-14 pl-12 pr-4 rounded-full bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary text-lg transition-all"
+                    />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-6 h-6" />
+                </div>
+
+                {/* <select
+                    value={format}
+                    onChange={(e) => setFormat(e.target.value)}
+                    className="h-14 px-6 rounded-full bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary text-lg transition-all outline-none appearance-none cursor-pointer hover:bg-white/10"
+                >
+                    <option value="vinyl" className="bg-zinc-900">Vinyl</option>
+                    <option value="cd" className="bg-zinc-900">CD</option>
+                    <option value="cassette" className="bg-zinc-900">Cassette</option>
+                    <option value="all" className="bg-zinc-900">All Formats</option>
+                </select> */}
+
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-primary text-white font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                    className="px-8 h-14 rounded-full bg-primary text-white font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center min-w-[100px]"
                 >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search'}
                 </button>
@@ -92,7 +116,7 @@ export default function SearchInterface() {
                                     <Disc className="w-12 h-12 opacity-20" />
                                 </div>
                             )}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center flex-col gap-y-4 justify-center">
                                 <button
                                     onClick={() => handleAdd(result)}
                                     disabled={addingId === result.id}
@@ -104,6 +128,20 @@ export default function SearchInterface() {
                                         <>
                                             <Plus className="w-5 h-5" />
                                             Add to Collection
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => handleAdd(result, false)}
+                                    disabled={addingId === result.id}
+                                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-white text-black font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 disabled:opacity-75"
+                                >
+                                    {addingId === result.id ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Goal className="w-5 h-5" />
+                                            add to wishlist
                                         </>
                                     )}
                                 </button>

@@ -1,6 +1,7 @@
 
 export interface DiscogsResult {
     id: number
+    format: string[]
     title: string
     year?: string
     cover_image?: string
@@ -33,7 +34,7 @@ export interface DiscogsRelease {
     tracklist: DiscogsTrack[]
 }
 
-export async function searchDiscogs(query: string, page: number = 1): Promise<DiscogsSearchResponse> {
+export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {
     if (!query) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
 
     // Support both Token (if user has it) or Key/Secret (which user provided)
@@ -52,10 +53,14 @@ export async function searchDiscogs(query: string, page: number = 1): Promise<Di
     }
 
     try {
+        let url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=master&page=${page}&per_page=12`
+
+        if (format && format !== 'all') {
+            url += `&format=${encodeURIComponent(format)}`
+        }
+
         const res = await fetch(
-            `https://api.discogs.com/database/search?q=${encodeURIComponent(
-                query
-            )}&type=release&page=${page}&per_page=12`,
+            url,
             {
                 headers: {
                     'User-Agent': 'VinylCollectionApp/1.0',

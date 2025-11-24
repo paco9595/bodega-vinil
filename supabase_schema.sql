@@ -7,6 +7,7 @@ create table public.vinyls (
   year text null,
   cover_image text null,
   discogs_id integer null,
+  owned boolean not null default true,
   created_at timestamp with time zone not null default now(),
   constraint vinyls_pkey primary key (id)
 );

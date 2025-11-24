@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 export async function searchVinyls(formData: FormData) {
     const query = formData.get('query') as string
     const page = Number(formData.get('page')) || 1
+    const format = (formData.get('format') as string) || 'vinyl'
 
     if (!query) {
         return {
@@ -15,7 +16,7 @@ export async function searchVinyls(formData: FormData) {
         }
     }
 
-    return await searchDiscogs(query, page)
+    return await searchDiscogs(query, page, format)
 }
 
 export async function addToCollection(vinyl: {
@@ -24,6 +25,7 @@ export async function addToCollection(vinyl: {
     year: string
     cover_image: string
     discogs_id: number
+    owned: boolean
 }) {
     const supabase = await createClient()
 

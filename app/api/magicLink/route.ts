@@ -5,16 +5,27 @@ import { createClient } from '@/utils/supabase/server';
 export async function POST(req: NextRequest) {
     const supabase = await createClient()
 
-    const { data: user } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
-    const token = randomBytes(32).toString('hex'); // token único
-    const expires = Date.now() + 24 * 60 * 60 * 1000;
+    const token = randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     try {
-        const { data: tokenData, error } = await supabase.from('tokens').insert({ token, page: 'protected-page', expires, user_id: user.user?.id });
-        console.log(tokenData)
-        return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
+        const { data: link, error: linkError } = await supabase
+            .from("shared_links")
+            .select("*")
+            .eq("user_id", user.id)
+        if (link && link?.length === 0) {
+            const { data: tokenData, error } = await supabase.from('shared_links').insert({ token, page: 'wishlist', expires, user_id: user.id });
+
+            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
+        } else {
+            const { data: tokenData, error } = await supabase.from('shared_links').update({ expires }).eq('id', link[0].id);
+            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
+        }
+
+
     } catch (error) {
         console.log(error)
         return NextResponse.json({ error: 'Error al generar el enlace' }, { status: 500 });
@@ -30,14 +41,13 @@ export async function GET(req: NextRequest) {
             .from("shared_links")
             .select("*")
             .eq("token", token)
-            .gt("expires", new Date())
             .single();
 
         if (linkError || !link) {
             return NextResponse.json({ error: "Token inválido o expirado" }, { status: 401 });
         }
         const { data: vinyls, error: vinylError } = await supabase
-            .from("vinyl")
+            .from("vinyls")
             .select("*")
             .eq("user_id", link.user_id)
             .eq("owned", false)

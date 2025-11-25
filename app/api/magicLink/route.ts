@@ -16,21 +16,21 @@ export async function POST(req: NextRequest) {
             .from("shared_links")
             .select("*")
             .eq("user_id", user.id)
-        if (link && link?.length === 0) {
+            .single()
+
+        if (!link || link.length === 0) {
             const { data: tokenData, error } = await supabase.from('shared_links').insert({ token, page: 'wishlist', expires, user_id: user.id });
 
             return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
         } else {
-            const { data: tokenData, error } = await supabase.from('shared_links').update({ expires }).eq('id', link[0].id);
+            await supabase.from('shared_links').update({ expires }).eq('id', link.id);
             return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
         }
-
 
     } catch (error) {
         console.log(error)
         return NextResponse.json({ error: 'Error al generar el enlace' }, { status: 500 });
     }
-
 }
 
 export async function GET(req: NextRequest) {
@@ -62,5 +62,4 @@ export async function GET(req: NextRequest) {
         console.log(error)
         return NextResponse.json({ error: 'Error al generar el enlace' }, { status: 500 });
     }
-
 }

@@ -34,10 +34,14 @@ function WishListContent() {
         const verifytToken = async () => {
             // hacer llamda get al magicLink con el token
             const res = await fetch(`/api/magicLink?token=${token}`)
-            const data = await res.json()
+            const { vinyls, error } = await res.json()
 
-            console.log(data)
-            setVinyls(data || [])
+
+            if (error === 'Token expirado') {
+                return redirect('/not-found')
+            }
+            console.log(vinyls)
+            setVinyls(vinyls || [])
         }
 
         if (!token) {

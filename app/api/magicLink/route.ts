@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
     const token = randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const expires = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     try {
         const { data: link, error: linkError } = await supabase
@@ -44,8 +44,13 @@ export async function GET(req: NextRequest) {
             .single();
 
         if (linkError || !link) {
-            return NextResponse.json({ error: "Token inválido o expirado" }, { status: 401 });
+            return NextResponse.json({ error: "Token inválido" }, { status: 401 });
         }
+
+        if (new Date(link.expires) < new Date()) {
+            return NextResponse.json({ error: "Token expirado" }, { status: 401 });
+        }
+
         const { data: vinyls, error: vinylError } = await supabase
             .from("vinyls")
             .select("*")
@@ -57,7 +62,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: vinylError.message }, { status: 500 });
         }
 
-        return NextResponse.json(vinyls)
+        return NextResponse.json({ vinyls, error: null })
     } catch (error) {
         console.log(error)
         return NextResponse.json({ error: 'Error al generar el enlace' }, { status: 500 });

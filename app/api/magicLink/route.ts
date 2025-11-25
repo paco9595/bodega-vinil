@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
     const token = randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     try {
         const { data: link, error: linkError } = await supabase

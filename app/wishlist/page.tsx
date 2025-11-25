@@ -3,10 +3,11 @@ import VinylTable from "@/components/VinylTable"
 import { redirect, useSearchParams } from "next/navigation"
 import ShareModal from "@/components/ShareModal"
 import { createClient } from "@/utils/supabase/client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
+import { Vinyl } from "@/lib/types/vinil"
 
-export default function WishListPage() {
-    const [vinyls, setVinyls] = useState([])
+function WishListContent() {
+    const [vinyls, setVinyls] = useState<Vinyl[]>([])
     const query = useSearchParams()
     const token = query.get('token')
     console.log(token)
@@ -27,7 +28,7 @@ export default function WishListPage() {
                 .select('*')
                 .filter('owned', 'eq', false)
                 .order('created_at', { ascending: false })
-            setVinyls(data)
+            setVinyls(data || [])
         }
 
         const verifytToken = async () => {
@@ -44,7 +45,7 @@ export default function WishListPage() {
         } else {
             verifytToken()
         }
-    }, [])
+    }, [token])
 
     return (
         <div>
@@ -56,5 +57,13 @@ export default function WishListPage() {
             </div>
             <VinylTable vinyls={vinyls || []} />
         </div>
+    )
+}
+
+export default function WishListPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <WishListContent />
+        </Suspense>
     )
 }

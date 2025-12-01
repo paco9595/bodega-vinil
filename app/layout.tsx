@@ -36,6 +36,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/vinyl.ico",
+    apple: '/vinyl.jpg',
   },
 };
 

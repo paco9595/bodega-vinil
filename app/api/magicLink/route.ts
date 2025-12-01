@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
             .eq("user_id", user.id)
             .single()
 
-        if (!link || link.length === 0) {
+        if (!link) {
             const { data: tokenData, error } = await supabase.from('shared_links').insert({ token, page: 'wishlist', expires, user_id: user.id });
 
             return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         const { data: link, error: linkError } = await supabase
             .from("shared_links")
             .select("*")
-            .eq("token", token)
+            .eq("token", token || '')
             .single();
 
         if (linkError || !link) {

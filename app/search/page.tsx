@@ -1,4 +1,10 @@
 import SearchInterface from '@/components/SearchInterface'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: "Search Records",
+    description: "Search the Discogs database for vinyl records to add to your collection.",
+};
 
 export default function SearchPage() {
     return (

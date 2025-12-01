@@ -1,6 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import VinylTable from '@/components/VinylTable'
 import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: "My Collection",
+    description: "View and manage your personal vinyl record collection.",
+};
 
 export default async function DashboardPage() {
     const supabase = await createClient()

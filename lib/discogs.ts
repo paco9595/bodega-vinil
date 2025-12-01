@@ -32,6 +32,8 @@ export interface DiscogsRelease {
     year: number
     images?: { uri: string }[]
     tracklist: DiscogsTrack[]
+    genres: string[]
+    styles: string[]
 }
 
 export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {

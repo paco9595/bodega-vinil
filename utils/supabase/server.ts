@@ -1,10 +1,12 @@
+import { Database } from '@/lib/types/database.types'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+
 
 export async function createClient(serviceRole: boolean = false) {
     const cookieStore = await cookies()
 
-    return createServerClient(
+    return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceRole ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.NEXT_PUBLIC_SUPABASE_API_KEY!,
         {

@@ -37,8 +37,8 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                     />
                 )}
                 <div className="absolute inset-0 z-20 flex items-end pb-10 container mx-auto px-4">
-                    <div className="flex flex-col md:flex-row gap-8 items-end">
-                        <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
+                    <div className="flex flex-col justify-center md:justify-start  md:flex-row gap-8 w-full">
+                        <div className="mx-auto md:mx-0 relative w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
                             {vinyl.cover_image ? (
                                 <Image
                                     src={vinyl.cover_image}
@@ -52,7 +52,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                                 </div>
                             )}
                         </div>
-                        <div className="space-y-4 mb-2">
+                        <div className="mx-auto md:mx-0 space-y-4 mb-2 mt-auto">
                             <h1 className="text-4xl md:text-6xl font-bold text-white">{vinyl.title}</h1>
                             <div className="flex items-center gap-4 text-xl text-gray-200">
                                 <span className="font-medium">{vinyl.artist}</span>

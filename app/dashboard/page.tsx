@@ -25,9 +25,10 @@ export default async function DashboardPage() {
         .filter('owned', 'eq', true)
         .order('created_at', { ascending: false })
 
+    const { data: genres } = await supabase.from('genres').select('name')
     return (
         <div className="min-h-screen bg-background">
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-6 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold">
                         My Collection
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
                     </div>
                 </div>
 
-                <VinylTable vinyls={vinyls || []} />
+                <VinylTable vinyls={vinyls || []} genres={genres?.map((genre) => genre.name) || []} />
             </main>
         </div>
     )

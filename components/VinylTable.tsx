@@ -2,68 +2,72 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
-import { useState } from 'react'
+import { Search, ArrowUp, ArrowDown, ArrowUpDown, Plus } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
 import { NormalizeString, NormalizeYear } from '@/utils/utilits'
+import { addToCollection } from '@/app/actions'
+import { Vinyl } from '@/lib/types/tables'
 
-interface Vinyl {
-    id: string
-    title: string
-    artist: string
-    year: string | null
-    format: string
-    cover_image: string | null
-    discogs_id: number | null
+interface VinylTableProps {
+    vinyls: Vinyl[]
+    isLogin?: boolean
+    genres: string[]
 }
 
-export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
+export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTableProps) {
     const [searchQuery, setSearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
+    const [genreFilter, setGenreFilter] = useState<string>('all')
     const [sortColumn, setSortColumn] = useState<keyof Vinyl | null>(null)
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-    console.log('Vinyls', vinyls)
-
-    const handleSort = (column: keyof Vinyl) => {
+    const handleSort = useCallback((column: keyof Vinyl) => {
         if (sortColumn === column) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
         } else {
             setSortColumn(column)
             setSortDirection('asc')
         }
-    }
+    }, [sortColumn, sortDirection])
 
-    const filteredVinyls = vinyls.filter((vinyl) => {
-        const query = NormalizeString(searchQuery)
-        return (
-            NormalizeString(vinyl.title).includes(query) ||
-            NormalizeString(vinyl.artist).includes(query) ||
-            (NormalizeYear(vinyl.year || '').includes(query) ?? false)
-        )
-    }).sort((a, b) => {
-        if (!sortColumn) return 0
+    // Memoize filtered and sorted vinyls to prevent recalculation on every render
+    const filteredVinyls = useMemo(() => {
+        return vinyls.filter((vinyl) => {
+            const query = NormalizeString(searchQuery)
+            const matchesSearch = (
+                NormalizeString(vinyl.title).includes(query) ||
+                NormalizeString(vinyl.artist).includes(query) ||
+                (NormalizeYear(vinyl.year || '').includes(query) ?? false)
+            )
 
-        const aValue = a[sortColumn]
-        const bValue = b[sortColumn]
+            const matchesGenre = genreFilter === 'all' ||
+                (vinyl.release_data?.genres || []).includes(genreFilter)
 
-        if (aValue === bValue) return 0
-        if (aValue === null) return 1
-        if (bValue === null) return -1
+            return matchesSearch && matchesGenre
+        }).sort((a, b) => {
+            if (!sortColumn) return 0
 
-        const compareResult = aValue.toString().localeCompare(bValue.toString(), undefined, { numeric: true })
+            const aValue = a[sortColumn]
+            const bValue = b[sortColumn]
 
-        return sortDirection === 'asc' ? compareResult : -compareResult
-    })
+            if (aValue === bValue) return 0
+            if (aValue === null) return 1
+            if (bValue === null) return -1
 
-    // Reset to first page when search changes
-    if (searchQuery && currentPage !== 1) {
-        setCurrentPage(1)
-    }
+            const compareResult = aValue.toString().localeCompare(bValue.toString(), undefined, { numeric: true })
 
-    const totalPages = Math.ceil(filteredVinyls.length / itemsPerPage)
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const paginatedVinyls = filteredVinyls.slice(startIndex, startIndex + itemsPerPage)
+            return sortDirection === 'asc' ? compareResult : -compareResult
+        })
+    }, [vinyls, searchQuery, genreFilter, sortColumn, sortDirection])
+
+    // Memoize pagination calculations
+    const { totalPages, startIndex, paginatedVinyls } = useMemo(() => {
+        const total = Math.ceil(filteredVinyls.length / itemsPerPage)
+        const start = (currentPage - 1) * itemsPerPage
+        const paginated = filteredVinyls.slice(start, start + itemsPerPage)
+        return { totalPages: total, startIndex: start, paginatedVinyls: paginated }
+    }, [filteredVinyls, currentPage, itemsPerPage])
 
     const SortIcon = ({ column }: { column: keyof Vinyl }) => {
         if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-2 opacity-50" />
@@ -101,22 +105,41 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                     />
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Show</span>
-                    <select
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value))
-                            setCurrentPage(1)
-                        }}
-                        className="bg-white/5 border border-white/10 rounded px-2 py-1 focus:border-primary outline-none"
-                    >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                    </select>
-                    <span>per page</span>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Genre</span>
+                        <select
+                            value={genreFilter}
+                            onChange={(e) => {
+                                setGenreFilter(e.target.value)
+                                setCurrentPage(1)
+                            }}
+                            className="bg-white/5 border border-white/10 rounded px-2 py-1 focus:border-primary outline-none"
+                        >
+                            <option value="all">All</option>
+                            {genres.map(genre => (
+                                <option key={genre} value={genre}>{genre}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Show</span>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                setItemsPerPage(Number(e.target.value))
+                                setCurrentPage(1)
+                            }}
+                            className="bg-white/5 border border-white/10 rounded px-2 py-1 focus:border-primary outline-none"
+                        >
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+                        <span>per page</span>
+                    </div>
                 </div>
             </div>
 
@@ -139,6 +162,13 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                                     <SortableHeader column="artist" label="Artist" />
                                     <SortableHeader column="format" label="Format" />
                                     <SortableHeader column="year" label="Year" className="w-24" />
+                                    {isLogin && <th
+                                        className={`p-4 cursor-pointer hover:bg-white/10 transition-colors select-none`}
+                                    >
+                                        <div className="flex items-center">
+                                            Action
+                                        </div>
+                                    </th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -151,6 +181,7 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                                                         src={vinyl.cover_image}
                                                         alt={vinyl.title}
                                                         fill
+                                                        sizes="48px"
                                                         className="object-cover"
                                                     />
                                                 ) : (
@@ -168,6 +199,14 @@ export default function VinylTable({ vinyls }: { vinyls: Vinyl[] }) {
                                         <td className="p-4">{vinyl.artist}</td>
                                         <td className="p-4">{vinyl.format}</td>
                                         <td className="p-4">{vinyl.year || '-'}</td>
+                                        {isLogin && <td className="mx-auto">
+                                            <div
+                                                onClick={() => addToCollection(vinyl)}
+                                                className="flex items-center gap-2 border w-fit border-black/50 rounded p-2 justify-center">
+                                                <Plus className="w-5 h-5 flex-shrink-0" />
+                                                <span className="hidden sm:inline">Collection</span>
+                                            </div>
+                                        </td>}
                                     </tr>
                                 ))}
                             </tbody>

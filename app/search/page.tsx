@@ -1,5 +1,6 @@
 import SearchInterface from '@/components/SearchInterface'
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
     title: "Search Records",
@@ -19,7 +20,9 @@ export default function SearchPage() {
                     </p>
                 </div>
 
-                <SearchInterface />
+                <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+                    <SearchInterface />
+                </Suspense>
             </main>
         </div>
     )

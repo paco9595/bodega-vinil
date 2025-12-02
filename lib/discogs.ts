@@ -1,16 +1,8 @@
+import { DiscogsRelease } from "./types/DiscogsRelease"
 
-export interface DiscogsResult {
-    id: number
-    format: string[]
-    title: string
-    year?: string
-    cover_image?: string
-    thumb?: string
-    resource_url: string
-}
 
 export interface DiscogsSearchResponse {
-    results: DiscogsResult[]
+    results: DiscogsRelease[]
     pagination: {
         page: number
         pages: number
@@ -18,23 +10,7 @@ export interface DiscogsSearchResponse {
         items: number
     }
 }
-export interface DiscogsTrack {
-    position: string
-    type_: string
-    title: string
-    duration: string
-}
 
-export interface DiscogsRelease {
-    id: number
-    title: string
-    artists: { name: string }[]
-    year: number
-    images?: { uri: string }[]
-    tracklist: DiscogsTrack[]
-    genres: string[]
-    styles: string[]
-}
 
 export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {
     if (!query) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
@@ -102,7 +78,7 @@ export async function getRelease(id: number): Promise<DiscogsRelease | null> {
     }
 
     try {
-        const res = await fetch(`https://api.discogs.com/releases/${id}`, {
+        const res = await fetch(`https://api.discogs.com/masters/${id}`, {
             headers: {
                 'User-Agent': 'VinylCollectionApp/1.0',
                 'Authorization': authHeader

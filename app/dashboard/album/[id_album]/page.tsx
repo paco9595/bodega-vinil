@@ -1,26 +1,59 @@
-import { createClient } from "@/utils/supabase/server";
 import { getRelease } from "@/lib/discogs";
 import Image from "next/image";
 import { Disc, Music, PlayCircle } from "lucide-react";
+import { createAdminClient } from "@/utils/supabase/server";
 
+// Type for album display data (subset of full Vinyl type)
+type AlbumData = {
+    title: string
+    artist: string
+    year: string | null
+    cover_image: string | null
+    discogs_id?: number | null
+}
+
+export async function generateStaticParams() {
+    const supabase = createAdminClient();
+    const { data: vinyls } = await supabase
+        .from('vinyls')
+        .select('id')
+    return vinyls?.map((vinyl) => ({ id_album: vinyl.id })) || []
+}
 
 export default async function AlbumPage({ params }: { params: Promise<{ id_album: string }> }) {
-    const supabase = await createClient();
-    const idAlbum = (await params)?.id_album
+    const { id_album } = await params
+    const supabase = createAdminClient();
 
+    // Try to get vinyl from database
     const { data: vinyl } = await supabase
         .from('vinyls')
-        .select('id, title, artist, year, cover_image, discogs_id')
-        .eq('id', idAlbum)
+        .select('*')
+        .eq('id', id_album)
         .single()
 
-    if (!vinyl) {
-        return <div className="p-8 text-center">Album not found</div>
-    }
-
     let release = null
-    if (vinyl.discogs_id) {
-        release = await getRelease(vinyl.discogs_id)
+    let albumData: AlbumData | null = vinyl
+
+    // If vinyl not found in database, try to get it from Discogs
+    if (!vinyl) {
+        // Assume id_album is a Discogs release ID
+        release = await getRelease(Number(id_album))
+
+        if (!release) {
+            return <div className="p-8 text-center">Album not found</div>
+        }
+
+        // Use Discogs data as album data
+        albumData = {
+            title: release.title,
+            artist: release.artists?.[0]?.name || 'Unknown Artist',
+            year: release.year?.toString() || null,
+            cover_image: release.cover_image || release.images?.[0]?.uri || null,
+            discogs_id: release.id
+        }
+    } else {
+        // Get detailed release information from Discogs if available
+        release = vinyl.discogs_id ? await getRelease(vinyl.discogs_id) : null
     }
 
     return (
@@ -28,10 +61,10 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
             {/* Hero Section */}
             <div className="relative h-[40vh] w-full overflow-hidden">
                 <div className="absolute inset-0 bg-black/60 z-10" />
-                {vinyl.cover_image && (
+                {albumData?.cover_image && (
                     <Image
-                        src={vinyl.cover_image}
-                        alt={vinyl.title}
+                        src={albumData.cover_image}
+                        alt={albumData.title}
                         fill
                         className="object-cover blur-xl opacity-50"
                     />
@@ -39,10 +72,10 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                 <div className="absolute inset-0 z-20 flex items-end pb-10 container mx-auto px-4">
                     <div className="flex flex-col justify-center md:justify-start  md:flex-row gap-8 w-full">
                         <div className="mx-auto md:mx-0 relative w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
-                            {vinyl.cover_image ? (
+                            {albumData?.cover_image ? (
                                 <Image
-                                    src={vinyl.cover_image}
-                                    alt={vinyl.title}
+                                    src={albumData.cover_image}
+                                    alt={albumData.title}
                                     fill
                                     className="object-cover"
                                 />
@@ -53,11 +86,11 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                             )}
                         </div>
                         <div className="mx-auto md:mx-0 space-y-4 mb-2 mt-auto">
-                            <h1 className="text-4xl md:text-6xl font-bold text-white">{vinyl.title}</h1>
+                            <h1 className="text-4xl md:text-6xl font-bold text-white">{albumData?.title}</h1>
                             <div className="flex items-center gap-4 text-xl text-gray-200">
-                                <span className="font-medium">{vinyl.artist}</span>
+                                <span className="font-medium">{albumData?.artist}</span>
                                 <span>•</span>
-                                <span>{vinyl.year}</span>
+                                <span>{albumData?.year}</span>
                             </div>
                         </div>
                     </div>
@@ -87,7 +120,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                                             {track.duration}
                                         </span>
                                         <a
-                                            href={`https://open.spotify.com/search/${encodeURIComponent(`${vinyl.artist} ${track.title}`)}`}
+                                            href={`https://open.spotify.com/search/${encodeURIComponent(`${albumData.artist} ${track.title}`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="p-2 rounded-full bg-[#1DB954] text-black opacity-0 group-hover:opacity-100 transition-all hover:scale-105"

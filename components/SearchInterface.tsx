@@ -1,36 +1,56 @@
 'use client'
 
 import { addToCollection, searchVinyls } from '@/app/actions'
-import { DiscogsResult, DiscogsSearchResponse } from '@/lib/discogs'
+import { DiscogsSearchResponse } from '@/lib/discogs'
+import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
 import { Disc, Loader2, Plus, Search, ChevronLeft, ChevronRight, Goal } from 'lucide-react'
 import Image from 'next/image'
-import { redirect, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 export default function SearchInterface() {
     const navigate = useRouter()
+    const searchParams = useSearchParams()
     const [query, setQuery] = useState('')
     const [format, setFormat] = useState('vinyl')
-    const [results, setResults] = useState<DiscogsResult[]>([])
+    const [results, setResults] = useState<DiscogsRelease[]>([])
     const [pagination, setPagination] = useState({ page: 1, pages: 1 })
     const [loading, setLoading] = useState(false)
     const [addingId, setAddingId] = useState<number | null>(null)
 
-    const handleSearch = async (e?: React.FormEvent, page: number = 1) => {
-        e?.preventDefault()
-        if (!query.trim()) return
+    // Load initial search from URL params
+    useEffect(() => {
+        const urlQuery = searchParams.get('q')
+        const urlPage = searchParams.get('page')
+
+        if (urlQuery) {
+            setQuery(urlQuery)
+            performSearch(urlQuery, parseInt(urlPage || '1'))
+        }
+    }, []) // Only run on mount
+
+    const performSearch = async (searchQuery: string, page: number = 1) => {
+        if (!searchQuery.trim()) return
 
         setLoading(true)
         try {
-            console.log('Searching for', query, 'format', format, 'page', page)
+            console.log('Searching for', searchQuery, 'format', format, 'page', page)
             const formData = new FormData()
-            formData.append('query', query)
+            formData.append('query', searchQuery)
             formData.append('format', format)
             formData.append('page', page.toString())
 
             const data: DiscogsSearchResponse = await searchVinyls(formData)
+            console.log({ data })
             setResults(data.results || [])
             setPagination({ page: data.pagination.page, pages: data.pagination.pages })
+
+            // Update URL with search params
+            const params = new URLSearchParams()
+            params.set('q', searchQuery)
+            params.set('page', page.toString())
+            navigate.replace(`?${params.toString()}`)
         } catch (error) {
             console.error('Search failed', error)
         } finally {
@@ -38,7 +58,12 @@ export default function SearchInterface() {
         }
     }
 
-    const handleAdd = async (vinyl: DiscogsResult, owned: boolean = true) => {
+    const handleSearch = async (e?: React.FormEvent, page: number = 1) => {
+        e?.preventDefault()
+        performSearch(query, page)
+    }
+
+    const handleAdd = async (vinyl: DiscogsRelease, owned: boolean = true) => {
         setAddingId(vinyl.id)
         try {
             const [artist, title] = vinyl.title.split(' - ').map((s) => s.trim())
@@ -46,10 +71,11 @@ export default function SearchInterface() {
             await addToCollection({
                 title: title || vinyl.title,
                 artist: artist || 'Unknown Artist',
-                year: vinyl.year || '',
-                cover_image: vinyl.cover_image || vinyl.thumb || '',
+                year: `${vinyl.year}`,
+                cover_image: vinyl.images[0].uri,
                 discogs_id: vinyl.id,
                 owned,
+                release_data: vinyl
             })
 
             if (owned) {
@@ -76,18 +102,6 @@ export default function SearchInterface() {
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-6 h-6" />
                 </div>
-
-                {/* <select
-                    value={format}
-                    onChange={(e) => setFormat(e.target.value)}
-                    className="h-14 px-6 rounded-full bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary text-lg transition-all outline-none appearance-none cursor-pointer hover:bg-white/10"
-                >
-                    <option value="vinyl" className="bg-zinc-900">Vinyl</option>
-                    <option value="cd" className="bg-zinc-900">CD</option>
-                    <option value="cassette" className="bg-zinc-900">Cassette</option>
-                    <option value="all" className="bg-zinc-900">All Formats</option>
-                </select> */}
-
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
@@ -104,9 +118,9 @@ export default function SearchInterface() {
                         className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300"
                     >
                         <div className="aspect-square relative bg-black/40">
-                            {result.cover_image || result.thumb ? (
+                            {result.cover_image ? (
                                 <Image
-                                    src={result.cover_image || result.thumb || ''}
+                                    src={result.cover_image}
                                     alt={result.title}
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -120,7 +134,7 @@ export default function SearchInterface() {
                         <div className="p-4 space-y-3">
                             <div>
                                 <h3 className="font-bold text-lg truncate" title={result.title}>
-                                    {result.title}
+                                    <Link href={`/dashboard/album/${result.master_id}`}>{result.title} {result.id}</Link>
                                 </h3>
                                 <p className="text-muted-foreground text-sm">{result.year}</p>
                             </div>

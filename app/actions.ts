@@ -1,5 +1,7 @@
 'use server'
 import { searchDiscogs } from '@/lib/discogs'
+
+import { TablesInsert } from '@/lib/types/database.types'
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -19,14 +21,9 @@ export async function searchVinyls(formData: FormData) {
     return await searchDiscogs(query, page, format)
 }
 
-export async function addToCollection(vinyl: {
-    title: string
-    artist: string
-    year: string
-    cover_image: string
-    discogs_id: number
-    owned: boolean
-}) {
+
+
+export async function addToCollection(vinyl: Omit<TablesInsert<'vinyls'>, 'user_id'>) {
     const supabase = await createClient()
 
     const {
@@ -38,8 +35,8 @@ export async function addToCollection(vinyl: {
     }
 
     const { error } = await supabase.from('vinyls').insert({
-        user_id: user.id,
         ...vinyl,
+        user_id: user.id,
     })
 
     if (error) {

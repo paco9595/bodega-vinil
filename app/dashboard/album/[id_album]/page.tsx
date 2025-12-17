@@ -61,7 +61,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
             {/* Hero Section */}
             <div className="relative h-[40vh] w-full overflow-hidden">
                 <div className="absolute inset-0 bg-black/60 z-10" />
-                {albumData?.cover_image && (
+                {albumData && albumData?.cover_image && (
                     <Image
                         src={albumData.cover_image}
                         alt={albumData.title}
@@ -119,7 +119,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                                         <span className="text-sm text-muted-foreground font-mono">
                                             {track.duration}
                                         </span>
-                                        <a
+                                        {albumData && <a
                                             href={`https://open.spotify.com/search/${encodeURIComponent(`${albumData.artist} ${track.title}`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -127,7 +127,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
                                             title="Play on Spotify"
                                         >
                                             <PlayCircle className="w-5 h-5" />
-                                        </a>
+                                        </a>}
                                     </div>
                                 </div>
                             ))}

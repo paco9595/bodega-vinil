@@ -1,4 +1,3 @@
-import React from 'react';
 
 const DatabaseIcon = ({
     size = 24,

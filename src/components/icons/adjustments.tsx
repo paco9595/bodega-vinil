@@ -1,4 +1,3 @@
-import React from 'react';
 
 const AdjustmentsHorizontal16SolidIcon = ({
   size = 24,

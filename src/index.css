@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #ffffff;
+  background-color: #121212;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@theme {
+  --card-bg-color: #1E1E1E;
+  --sidebar-bg-color: #1a1a1a;
+  --primary-color: #1DB954;
+  --secondary-color: #2196F3;
+  --alert-color: #E91E63;
+  --text-title-color: #ffffff;
+  --text-color: #B3B3B3;
+  --disabled-color: #535353;
+  --border-color: #282828;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+.plus-jakarta-sans {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+}

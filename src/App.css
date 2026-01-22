@@ -1,0 +1,9 @@
+#root {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.login-card {
+  border: 1px solid var(--border-color);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}

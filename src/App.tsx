@@ -8,12 +8,12 @@ function App() {
 
   return (
     <div className='flex  w-screen h-screen'>
-      <Sidebar />
+      {/* <Sidebar /> */}
       <div className='w-full h-full flex-1 flex flex-col'>
-        <div className='sticky top-0 z-10 border-b border-[var(--border-color)]'>
+        {/* <div className='sticky top-0 z-10 border-b border-[var(--border-color)]'> */}
 
-          <Header />
-        </div>
+        {/* <Header /> */}
+        {/* </div> */}
         <RouterProvider router={router} />
       </div>
     </div>

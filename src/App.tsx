@@ -1,8 +1,8 @@
 import { RouterProvider } from 'react-router'
 import { router } from './router'
 import './App.css'
-import Sidebar from './components/sidebar'
-import Header from './components/header'
+// import Sidebar from './components/sidebar'
+// import Header from './components/header'
 
 function App() {
 

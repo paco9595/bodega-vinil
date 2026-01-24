@@ -8,7 +8,7 @@ export default function MobileNavbar() {
 
     return (
         <Portal>
-            <nav className="sticky  bottom-0 left-0 right-0 bg-white border-t py-4 grid grid-cols-3 md:hidden">
+            <nav className="sticky  bottom-0 left-0 right-0 bg-(--bg) border-t py-4 grid grid-cols-3 md:hidden text-(--text)">
                 <Link href="/wishlist" className="flex items-center gap-2 justify-center">
                     <Heart className="w-5 h-5" />
                 </Link>

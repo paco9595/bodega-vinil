@@ -25,13 +25,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0a0a] to-black p-4">
+    <div className="min-h-screen flex flex-col items-center pt-20 md:pt-40 justify-center md:justify-start bg-(--bg) p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center space-y-2">
           <div className="p-4 rounded-full bg-primary/10 ring-1 ring-primary/20 mb-4">
             <Disc className="w-12 h-12 text-primary animate-spin-slow" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
+          <h1 className="text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-linear-to-br from-white to-gray-400">
             Vinyl Collection
           </h1>
           <p className="text-muted-foreground text-lg">

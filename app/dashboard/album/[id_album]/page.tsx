@@ -55,7 +55,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
         // Get detailed release information from Discogs if available
         release = vinyl.discogs_id ? await getRelease(vinyl.discogs_id) : null
     }
-
+    console.log({ songs: release?.tracklist })
     return (
         <div className="min-h-screen bg-background pb-20">
             {/* Hero Section */}

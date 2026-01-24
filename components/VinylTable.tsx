@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { Search, ArrowUp, ArrowDown, ArrowUpDown, Plus } from 'lucide-react'
 import { useState, useMemo, useCallback } from 'react'
 import { NormalizeString, NormalizeYear } from '@/utils/utilits'
-import { addToCollection } from '@/app/actions'
+import { addToCollection, wishlistToCollection } from '@/app/actions'
 import { Vinyl } from '@/lib/types/tables'
+import { toast } from 'sonner'
 
 interface VinylTableProps {
     vinyls: Vinyl[]
@@ -88,6 +89,15 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
         </th>
     )
 
+    const addToCollectionFromWishlist = async (vinylId: string) => {
+        try {
+            await wishlistToCollection(vinylId)
+            toast.success('Vinyl added to collection')
+        } catch (error) {
+            console.error('Error adding vinyl:', error)
+            toast.error('Error adding vinyl to collection')
+        }
+    }
     return (
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
@@ -201,7 +211,7 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
                                         <td className="p-4">{vinyl.year || '-'}</td>
                                         {isLogin && <td className="mx-auto">
                                             <div
-                                                onClick={() => addToCollection(vinyl)}
+                                                onClick={() => addToCollectionFromWishlist(vinyl.id)}
                                                 className="flex items-center gap-2 border w-fit border-black/50 rounded p-2 justify-center">
                                                 <Plus className="w-5 h-5 flex-shrink-0" />
                                                 <span className="hidden sm:inline">Collection</span>

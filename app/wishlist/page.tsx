@@ -13,7 +13,6 @@ function WishListContent() {
     const [loading, setLoading] = useState(true)
     const query = useSearchParams()
     const token = query.get('token')
-    console.log(token)
 
     // Memoize supabase client to prevent recreation on every render
     const supabase = useMemo(() => createClient(), [])

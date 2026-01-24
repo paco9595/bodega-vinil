@@ -3,8 +3,6 @@ import { searchDiscogs } from '@/lib/discogs'
 
 import { TablesInsert } from '@/lib/types/database.types'
 import { createClient } from '@/utils/supabase/server'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 export async function searchVinyls(formData: FormData) {
     const query = formData.get('query') as string
@@ -25,7 +23,6 @@ export async function searchVinyls(formData: FormData) {
 
 export async function addToCollection(vinyl: Omit<TablesInsert<'vinyls'>, 'user_id'>) {
     const supabase = await createClient()
-
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -43,7 +40,23 @@ export async function addToCollection(vinyl: Omit<TablesInsert<'vinyls'>, 'user_
         console.error('Error adding vinyl:', error)
         throw new Error('Failed to add vinyl')
     }
+}
 
-    // revalidatePath('/dashboard')
-    // redirect('/dashboard')
+export async function wishlistToCollection(vinylId: string) {
+    const supabase = await createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+        throw new Error('Not authenticated')
+    }
+
+    const { error } = await supabase.from('vinyls').update({
+        owned: true
+    }).eq('id', vinylId).eq('user_id', user.id)
+    if (error) {
+        console.error('Error adding vinyl:', error)
+        throw new Error('Failed to add vinyl')
+    }
 }

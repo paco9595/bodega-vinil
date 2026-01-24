@@ -72,7 +72,7 @@ export default function SearchInterface() {
                 title: title || vinyl.title,
                 artist: artist || 'Unknown Artist',
                 year: `${vinyl.year}`,
-                cover_image: vinyl.images[0].uri,
+                cover_image: vinyl.cover_image || vinyl?.images?.[0]?.uri,
                 discogs_id: vinyl.id,
                 owned,
                 release_data: vinyl

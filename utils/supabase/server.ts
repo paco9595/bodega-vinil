@@ -8,8 +8,8 @@ export async function createClient(serviceRole: boolean = false) {
     const cookieStore = await cookies()
 
     return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        serviceRole ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.NEXT_PUBLIC_SUPABASE_API_KEY!,
+        process.env.SUPABASE_URL!,
+        serviceRole ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_API_KEY!,
         {
             cookies: {
                 getAll() {
@@ -33,7 +33,7 @@ export async function createClient(serviceRole: boolean = false) {
 
 export function createAdminClient() {
     return createSupabaseClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 }

@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/providers/themeProvider";
+import Sidebar from "@/components/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,24 +60,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased max-w-screen-xl mx-auto relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased mx-auto relative bg-[var(--bg)] grid grid-cols-1 md:grid-cols-[256px_1fr] `}
       >
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "Vinyl Collection",
-              url: "https://vinyl-collection.vercel.app",
-            }),
-          }}
-        />
-        <Header />
-        <Toaster />
-        {children}
+        <ThemeProvider>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Vinyl Collection",
+                url: "https://vinyl-collection.vercel.app",
+              }),
+            }}
+          />
+          <Sidebar />
+          <div className="flex flex-col">
+            <Header />
+            <div className="flex-1">
+              {children}
+            </div>
+          </div>
+        </ThemeProvider>
+        {/* <Toaster /> */}
       </body>
     </html>
   );

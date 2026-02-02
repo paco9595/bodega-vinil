@@ -139,3 +139,12 @@ export interface Image {
     width: number
     height: number
 }
+export interface DiscogsSearchResponse {
+    results: DiscogsRelease[]
+    pagination: {
+        page: number
+        pages: number
+        per_page: number
+        items: number
+    }
+}

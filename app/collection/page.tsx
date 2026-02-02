@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import VinylTable from '@/components/VinylTable'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
+import GridCards from '@/components/gridCards';
 
 export const metadata: Metadata = {
     title: "My Collection",
@@ -28,17 +29,19 @@ export default async function DashboardPage() {
     const { data: genres } = await supabase.from('genres').select('name')
     return (
         <div className="min-h-screen bg-background">
-            <main className="container mx-auto px-6 py-8">
+            <main className=" mx-auto py-8">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold">
-                        My Collection
-                    </h1>
-                    <div className="text-sm text-muted-foreground">
-                        {vinyls?.length || 0} Records
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-7xl font-bold">
+                            My Collection
+                        </h1>
+                        <p className="text-base mt-4 text-muted-foreground text-stone-500/70 font-light">Curating the finest analog sound since 1977</p>
                     </div>
+
                 </div>
 
-                <VinylTable vinyls={vinyls || []} genres={genres?.map((genre) => genre.name) || []} />
+                {/* <VinylTable vinyls={vinyls || []} genres={genres?.map((genre) => genre.name) || []} /> */}
+                <GridCards vinyls={vinyls || []} />
             </main>
         </div>
     )

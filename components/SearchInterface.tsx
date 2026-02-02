@@ -1,8 +1,7 @@
 'use client'
 
 import { addToCollection, searchVinyls } from '@/app/actions'
-import { DiscogsSearchResponse } from '@/lib/discogs'
-import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
+import { DiscogsRelease, DiscogsSearchResponse } from '@/lib/types/DiscogsRelease'
 import { Disc, Loader2, Plus, Search, ChevronLeft, ChevronRight, Goal } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -75,11 +74,11 @@ export default function SearchInterface() {
                 cover_image: vinyl.cover_image || vinyl?.images?.[0]?.uri,
                 discogs_id: vinyl.id,
                 owned,
-                release_data: vinyl
+                release_data: JSON.stringify(vinyl)
             })
 
             if (owned) {
-                navigate.push('/dashboard')
+                navigate.push('/collection')
             } else {
                 navigate.push('/wishlist')
             }
@@ -134,7 +133,7 @@ export default function SearchInterface() {
                         <div className="p-4 space-y-3">
                             <div>
                                 <h3 className="font-bold text-lg truncate" title={result.title}>
-                                    <Link href={`/dashboard/album/${result.master_id}`}>{result.title} {result.id}</Link>
+                                    <Link href={`/collection/album/${result.master_id}`}>{result.title} {result.id}</Link>
                                 </h3>
                                 <p className="text-muted-foreground text-sm">{result.year}</p>
                             </div>

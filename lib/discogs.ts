@@ -1,15 +1,4 @@
-import { DiscogsRelease } from "./types/DiscogsRelease"
-
-
-export interface DiscogsSearchResponse {
-    results: DiscogsRelease[]
-    pagination: {
-        page: number
-        pages: number
-        per_page: number
-        items: number
-    }
-}
+import { DiscogsRelease, DiscogsSearchResponse } from "./types/DiscogsRelease"
 
 
 export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {
@@ -31,8 +20,10 @@ export async function searchDiscogs(query: string, page: number = 1, format: str
     }
 
     try {
-        let url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=master&page=${page}&per_page=12`
-
+        let url = `https://api.discogs.com/database/search?${query}&type=master&page=${page}`
+        if (!query.includes('per_page')) {
+            url += `&per_page=12`
+        }
         if (format && format !== 'all') {
             url += `&format=${encodeURIComponent(format)}`
         }

@@ -7,6 +7,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { NormalizeString, NormalizeYear } from '@/utils/utilits'
 import { addToCollection, wishlistToCollection } from '@/app/actions'
 import { Vinyl } from '@/lib/types/tables'
+import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
 import { toast } from 'sonner'
 
 interface VinylTableProps {
@@ -42,8 +43,9 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
                 (NormalizeYear(vinyl.year || '').includes(query) ?? false)
             )
 
+            const releaseData = vinyl.release_data as unknown as DiscogsRelease
             const matchesGenre = genreFilter === 'all' ||
-                (vinyl.release_data?.genres || []).includes(genreFilter)
+                (releaseData?.genres || []).includes(genreFilter)
 
             return matchesSearch && matchesGenre
         }).sort((a, b) => {
@@ -202,7 +204,7 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
                                             </div>
                                         </td>
                                         <td className="p-4 font-medium">
-                                            <Link href={`/dashboard/album/${vinyl.id}`}>
+                                            <Link href={`/collection/album/${vinyl.id}`}>
                                                 {vinyl.title}
                                             </Link>
                                         </td>

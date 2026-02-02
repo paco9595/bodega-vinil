@@ -14,28 +14,10 @@ export default async function Header() {
     return (
         <header className="border-b border-white/10 backdrop-blur-xl sticky top-0 z-50">
             <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl">
+                <Link href="/collection" className="flex items-center gap-2 font-bold text-xl md:hidden">
                     <Disc className="w-6 h-6 text-primary" />
                     <span>Vinyl Collection</span>
                 </Link>
-
-                <div className="items-center gap-4 hidden md:flex">
-                    <Link
-                        href="/wishlist"
-                        className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                    >
-                        <Heart className="w-4 h-4" />
-                        Wishlist
-                    </Link>
-                    <Link
-                        href="/search"
-                        className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                    >
-                        <Search className="w-4 h-4" />
-                        Search Records
-                    </Link>
-                    <LogoutButton />
-                </div>
             </nav>
             <MobileNavbar />
         </header>

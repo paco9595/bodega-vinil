@@ -23,9 +23,9 @@ export default async function SearchPage() {
                 </Suspense>
                 <Carrusel records={recomendations || []} title="Recomendations" />
                 <Carrusel records={topArtist || []} title="Top Artists" />
-                {/* {topTags.map((tag: any) => (
+                {topTags.map((tag: any) => (
                     <Carrusel key={tag.tag} records={tag.results || []} title={tag.tag} />
-                ))} */}
+                ))}
             </main>
         </div>
     )

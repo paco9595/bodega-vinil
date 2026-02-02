@@ -71,25 +71,25 @@ import { NextResponse } from "next/server";
 
 
 
-export async function GET() {
-    const supabase = await createClient(true);
-    const { data: vinyl, error } = await supabase.from('vinyls').select('*')
+// export async function GET() {
+//     const supabase = await createClient(true);
+//     const { data: vinyl, error } = await supabase.from('vinyls').select('*')
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-    const arr: DiscogsRelease[] = [];
-    await Promise.all(
-        vinyl.map(async ({ discogs_id }) => {
-            await new Promise(res => setTimeout(res, 1000));
-            const release = await getRelease(discogs_id || 0)
+//     if (error) {
+//         return NextResponse.json({ error: error.message }, { status: 500 })
+//     }
+//     const arr: DiscogsRelease[] = [];
+//     await Promise.all(
+//         vinyl.map(async ({ discogs_id }) => {
+//             await new Promise(res => setTimeout(res, 1000));
+//             const release = await getRelease(discogs_id || 0)
 
-            await supabase.from('vinyls').update({ release_data: release || {} as DiscogsRelease }).eq('discogs_id', discogs_id || 0)
+//             await supabase.from('vinyls').update({ release_data: release || {} as DiscogsRelease }).eq('discogs_id', discogs_id || 0)
 
-            arr.push(release || {} as DiscogsRelease)
+//             arr.push(release || {} as DiscogsRelease)
 
-        })
-    )
-    return NextResponse.json({ results: arr, vinyl })
+//         })
+//     )
+//     return NextResponse.json({ results: arr, vinyl })
 
-}
+// }

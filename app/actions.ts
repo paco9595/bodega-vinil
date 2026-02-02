@@ -16,7 +16,7 @@ export async function searchVinyls(formData: FormData) {
         }
     }
 
-    return await searchDiscogs(query, page, format)
+    return await searchDiscogs(`q=${query}`, page, format)
 }
 
 

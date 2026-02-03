@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     const { data: genres } = await supabase.from('genres').select('name')
     return (
         <div className="min-h-screen bg-background">
-            <main className=" mx-auto py-8">
+            <main className="container mx-auto px-6 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex flex-col gap-2">
                         <h1 className="text-7xl font-bold">

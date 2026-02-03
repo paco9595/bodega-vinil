@@ -7,6 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 
 export default function SearchInterface() {
     const navigate = useRouter()
@@ -17,7 +18,6 @@ export default function SearchInterface() {
     const [pagination, setPagination] = useState({ page: 1, pages: 1 })
     const [loading, setLoading] = useState(false)
     const [addingId, setAddingId] = useState<number | null>(null)
-
     // Load initial search from URL params
     useEffect(() => {
         const urlQuery = searchParams.get('q')
@@ -39,12 +39,9 @@ export default function SearchInterface() {
             formData.append('query', searchQuery)
             formData.append('format', format)
             formData.append('page', page.toString())
-
             const data: DiscogsSearchResponse = await searchVinyls(formData)
-            console.log({ data })
             setResults(data.results || [])
             setPagination({ page: data.pagination.page, pages: data.pagination.pages })
-
             // Update URL with search params
             const params = new URLSearchParams()
             params.set('q', searchQuery)
@@ -59,7 +56,7 @@ export default function SearchInterface() {
 
     const handleSearch = async (e?: React.FormEvent, page: number = 1) => {
         e?.preventDefault()
-        performSearch(query, page)
+        await performSearch(query, page)
     }
 
     const handleAdd = async (vinyl: DiscogsRelease, owned: boolean = true) => {
@@ -75,8 +72,8 @@ export default function SearchInterface() {
                 discogs_id: vinyl.id,
                 owned,
                 release_data: JSON.stringify(vinyl)
-            })
-
+            });
+            toast("Vinyl added to collection.", { position: "bottom-right" })
             if (owned) {
                 navigate.push('/collection')
             } else {

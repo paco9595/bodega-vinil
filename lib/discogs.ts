@@ -1,4 +1,5 @@
 import { DiscogsRelease, DiscogsSearchResponse } from "./types/DiscogsRelease"
+import { DiscogsSearchResponseSchema, DiscogsReleaseSchema } from "./validations/discogs"
 
 
 export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {
@@ -45,10 +46,19 @@ export async function searchDiscogs(query: string, page: number = 1, format: str
         }
 
         const data = await res.json()
-        return {
-            results: data.results || [],
-            pagination: data.pagination || { page: 1, pages: 1, per_page: 12, items: 0 }
+
+        // Validate with Zod
+        const validated = DiscogsSearchResponseSchema.safeParse(data)
+        if (!validated.success) {
+            console.error('Discogs API Validation Error:', validated.error)
+            // Fallback: try to return raw data if it looks somewhat correct, or empty
+            return {
+                results: (data.results || []) as any,
+                pagination: data.pagination || { page: 1, pages: 1, per_page: 12, items: 0 }
+            }
         }
+
+        return validated.data as unknown as DiscogsSearchResponse
     } catch (error) {
         console.error('Discogs search error:', error)
         return { results: [], pagination: { page: 1, pages: 1, per_page: 12, items: 0 } }
@@ -81,7 +91,15 @@ export async function getRelease(id: number): Promise<DiscogsRelease | null> {
             throw new Error(`Failed to fetch release: ${res.status}`)
         }
 
-        return await res.json()
+        const data = await res.json()
+        const validated = DiscogsReleaseSchema.safeParse(data)
+
+        if (!validated.success) {
+            console.error('Discogs API Validation Error (Release):', validated.error)
+            return null
+        }
+
+        return validated.data as any // Cast because Zod inference might be slightly stricter or loose compared to original interface
     } catch (error) {
         console.error('Discogs release error:', error)
         return null

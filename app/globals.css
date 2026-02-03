@@ -10,3 +10,17 @@
     --bg: #191919;
     --text: #e5e7eb;
 }
+
+@keyframes scan-line {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(256px);
+    }
+}
+
+.animate-scan-line {
+    animation: scan-line 2s linear infinite;
+}

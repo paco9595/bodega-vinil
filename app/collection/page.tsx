@@ -3,6 +3,8 @@ import VinylTable from '@/components/VinylTable'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import GridCards from '@/components/gridCards';
+import Link from 'next/link'
+import SpinRecord from '@/components/SpinRecord'
 
 export const metadata: Metadata = {
     title: "My Collection",
@@ -37,7 +39,15 @@ export default async function DashboardPage() {
                         </h1>
                         <p className="text-base mt-4 text-muted-foreground text-stone-500/70 font-light">Curating the finest analog sound since 1977</p>
                     </div>
-
+                    <div className="flex gap-3">
+                        <SpinRecord vinyls={vinyls || []} />
+                        <Link
+                            href="/collection/insights"
+                            className="px-6 py-3 bg-white/5 border border-white/10 rounded-full font-medium hover:bg-white/10 transition-colors"
+                        >
+                            View Insights
+                        </Link>
+                    </div>
                 </div>
 
                 {/* <VinylTable vinyls={vinyls || []} genres={genres?.map((genre) => genre.name) || []} /> */}

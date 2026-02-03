@@ -32,14 +32,14 @@ export default async function DashboardPage() {
     return (
         <div className="min-h-screen bg-background">
             <main className="container mx-auto px-6 py-8">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
                     <div className="flex flex-col gap-2">
                         <h1 className="text-7xl font-bold">
                             My Collection
                         </h1>
                         <p className="text-base mt-4 text-muted-foreground text-stone-500/70 font-light">Curating the finest analog sound since 1977</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 mt-4 md:mt-0">
                         <SpinRecord vinyls={vinyls || []} />
                         <Link
                             href="/collection/insights"

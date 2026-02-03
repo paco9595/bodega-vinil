@@ -13,7 +13,7 @@ export async function getTopArtists() {
     return data
 }
 
-const TOP_GENRES = ['Rock', 'Pop', 'Hip Hop', 'Electronic', 'Jazz', 'Classical', 'Country', 'Blues', 'Folk', 'Latin', 'World', 'Funk', 'Soul']
+const TOP_GENRES = ['Rock', 'Pop', 'Hip Hop', 'Electronic']
 
 
 export async function getTopTags() {

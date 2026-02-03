@@ -1,8 +1,11 @@
 import { Disc, Heart, Search } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "./logout";
+import { createClient } from "@/utils/supabase/server";
 
-export default function Sidebar() {
+export default async function Sidebar() {
+
+
     return (
         <div className="w-64 border-r px-4 py-6 hidden md:flex border-white/10 backdrop-blur-xl sticky top-0 h-screen flex-col">
             <Link href="/collection" className="flex items-center gap-2 font-bold text-xl">

@@ -2,9 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import { Toaster } from "sonner";
+import { Toaster } from "@/providers/sonner";
 import { ThemeProvider } from "@/providers/themeProvider";
 import Sidebar from "@/components/sidebar";
+import { createClient } from "@/utils/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,15 +55,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = createClient()
+  const { data: { user } } = await (await supabase).auth.getUser()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased mx-auto relative bg-[var(--bg)] grid grid-cols-1 md:grid-cols-[256px_1fr] `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased mx-auto relative bg-[var(--bg)] grid grid-cols-1 ${user ? 'md:grid-cols-[256px_1fr]' : ''}`}
       >
         <ThemeProvider>
           <script
@@ -76,8 +80,9 @@ export default function RootLayout({
               }),
             }}
           />
-          <Sidebar />
+          {user && <Sidebar />}
           <div className="flex flex-col">
+            <Toaster />
             <Header />
             <div className="flex-1">
               {children}

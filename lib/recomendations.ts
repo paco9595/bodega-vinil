@@ -14,13 +14,11 @@ export async function getRecomendations(): Promise<DiscogsSearchResponse> {
             });
         if (!data) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
         const { genre } = pickWeightedRandom(data)
-        console.log(genre)
-        const results = await searchDiscogs(`genre=${genre}&per_page=20`)
 
-        console.log(results)
+        const results = await searchDiscogs(`genre=${genre}&per_page=20`)
         return results
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
     }
 }
@@ -40,6 +38,5 @@ function pickWeightedRandom(items: any[]) {
 
 export async function getTopAlbums(): Promise<DiscogsSearchResponse> {
     const results = await searchDiscogs(new URLSearchParams({ genre: "Rock", }).toString())
-    console.log(results)
     return results
 }

@@ -9,6 +9,8 @@ import { addToCollection, wishlistToCollection } from '@/app/actions'
 import { Vinyl } from '@/lib/types/tables'
 import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
 import { toast } from 'sonner'
+import { handleAction } from '@/utils/action-handler'
+import EmptyState from './EmptyState'
 
 interface VinylTableProps {
     vinyls: Vinyl[]
@@ -92,12 +94,13 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
     )
 
     const addToCollectionFromWishlist = async (vinylId: string) => {
-        try {
+        const result = await handleAction(async () => {
             await wishlistToCollection(vinylId)
+            return true
+        }, 'Error adding vinyl to collection')
+
+        if (result) {
             toast.success('Vinyl added to collection')
-        } catch (error) {
-            console.error('Error adding vinyl:', error)
-            toast.error('Error adding vinyl to collection')
         }
     }
     return (
@@ -156,13 +159,15 @@ export default function VinylTable({ vinyls, isLogin = false, genres }: VinylTab
             </div>
 
             {filteredVinyls.length === 0 ? (
-                <div className="text-center py-20">
-                    <p className="text-muted-foreground text-lg">
-                        {searchQuery
-                            ? 'No records found matching your search.'
-                            : 'No vinyls in your collection yet.'}
-                    </p>
-                </div>
+                <EmptyState
+                    icon={Search}
+                    title={searchQuery ? "No matching records" : "Collection is empty"}
+                    description={searchQuery
+                        ? `No vinyls found matching "${searchQuery}"`
+                        : "Start building your collection by searching for your favorite records."}
+                    actionLabel={!searchQuery ? "Search Records" : undefined}
+                    actionLink={!searchQuery ? "/search" : undefined}
+                />
             ) : (
                 <>
                     <div className="w-full overflow-x-auto text-black">

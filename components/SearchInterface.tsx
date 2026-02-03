@@ -8,6 +8,12 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { handleAction } from '@/utils/action-handler'
+import SkeletonCard from './SkeletonCard'
+import EmptyState from './EmptyState'
+import { useDebounce } from '@/hooks/useDebounce'
+import { motion } from 'framer-motion'
+// import BarcodeScanner from './BarcodeScanner'
 
 export default function SearchInterface() {
     const navigate = useRouter()
@@ -18,6 +24,8 @@ export default function SearchInterface() {
     const [pagination, setPagination] = useState({ page: 1, pages: 1 })
     const [loading, setLoading] = useState(false)
     const [addingId, setAddingId] = useState<number | null>(null)
+    const debouncedQuery = useDebounce(query, 500)
+
     // Load initial search from URL params
     useEffect(() => {
         const urlQuery = searchParams.get('q')
@@ -25,21 +33,35 @@ export default function SearchInterface() {
 
         if (urlQuery) {
             setQuery(urlQuery)
-            performSearch(urlQuery, parseInt(urlPage || '1'))
+            // performSearch will be triggered by debouncedQuery effect if we don't set it here explicitly? 
+            // Better to let debounce handle it, but we need to set initial state correctly.
+            // Actually, if we setQuery, debouncedQuery will update after 500ms and trigger effect.
         }
-    }, []) // Only run on mount
+    }, [])
+
+    // Trigger search when debouncedQuery changes
+    useEffect(() => {
+        if (debouncedQuery.trim()) {
+            performSearch(debouncedQuery, 1)
+        } else if (debouncedQuery === '') {
+            setResults([])
+        }
+    }, [debouncedQuery])
 
     const performSearch = async (searchQuery: string, page: number = 1) => {
         if (!searchQuery.trim()) return
 
         setLoading(true)
-        try {
+        const data = await handleAction(async () => {
             console.log('Searching for', searchQuery, 'format', format, 'page', page)
             const formData = new FormData()
             formData.append('query', searchQuery)
             formData.append('format', format)
             formData.append('page', page.toString())
-            const data: DiscogsSearchResponse = await searchVinyls(formData)
+            return await searchVinyls(formData)
+        }, "Error al buscar vinilos.")
+
+        if (data) {
             setResults(data.results || [])
             setPagination({ page: data.pagination.page, pages: data.pagination.pages })
             // Update URL with search params
@@ -47,21 +69,19 @@ export default function SearchInterface() {
             params.set('q', searchQuery)
             params.set('page', page.toString())
             navigate.replace(`?${params.toString()}`)
-        } catch (error) {
-            console.error('Search failed', error)
-        } finally {
-            setLoading(false)
         }
+        setLoading(false)
     }
 
     const handleSearch = async (e?: React.FormEvent, page: number = 1) => {
         e?.preventDefault()
+        // Immediate search on submit (bypassing debounce wait if user presses enter)
         await performSearch(query, page)
     }
 
     const handleAdd = async (vinyl: DiscogsRelease, owned: boolean = true) => {
         setAddingId(vinyl.id)
-        try {
+        const result = await handleAction(async () => {
             const [artist, title] = vinyl.title.split(' - ').map((s) => s.trim())
 
             await addToCollection({
@@ -73,17 +93,23 @@ export default function SearchInterface() {
                 owned,
                 release_data: JSON.stringify(vinyl)
             });
-            toast("Vinyl added to collection.", { position: "bottom-right" })
+            return true;
+        }, "Error al guardar el vinilo");
+
+        if (result) {
             if (owned) {
                 navigate.push('/collection')
             } else {
                 navigate.push('/wishlist')
             }
-        } catch (error) {
-            console.error('Add failed', error)
-            setAddingId(null)
         }
+        setAddingId(null)
     }
+
+    // const handleBarcodeDetected = async (barcode: string) => {
+    //     setQuery(barcode)
+    //     await performSearch(barcode, 1)
+    // }
 
     return (
         <div className="space-y-8">
@@ -98,6 +124,7 @@ export default function SearchInterface() {
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-6 h-6" />
                 </div>
+                {/* <BarcodeScanner onBarcodeDetected={handleBarcodeDetected} /> */}
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
@@ -108,69 +135,78 @@ export default function SearchInterface() {
             </form>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {results.map((result) => (
-                    <div
-                        key={result.id}
-                        className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300"
-                    >
-                        <div className="aspect-square relative bg-black/40">
-                            {result.cover_image ? (
-                                <Image
-                                    src={result.cover_image}
-                                    alt={result.title}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                    <Disc className="w-12 h-12 opacity-20" />
+                {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <SkeletonCard key={i} />
+                    ))
+                ) : (
+                    results.map((result, index) => (
+                        <motion.div
+                            key={result.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300"
+                        >
+                            <div className="aspect-square relative bg-black/40">
+                                {result.cover_image ? (
+                                    <Image
+                                        src={result.cover_image}
+                                        alt={result.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                        <Disc className="w-12 h-12 opacity-20" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 space-y-3">
+                                <div>
+                                    <h3 className="font-bold text-lg truncate" title={result.title}>
+                                        <Link href={`/collection/album/${result.master_id}`}>{result.title} {result.id}</Link>
+                                    </h3>
+                                    <p className="text-muted-foreground text-sm">{result.year}</p>
                                 </div>
-                            )}
-                        </div>
-                        <div className="p-4 space-y-3">
-                            <div>
-                                <h3 className="font-bold text-lg truncate" title={result.title}>
-                                    <Link href={`/collection/album/${result.master_id}`}>{result.title} {result.id}</Link>
-                                </h3>
-                                <p className="text-muted-foreground text-sm">{result.year}</p>
-                            </div>
 
-                            {/* Action buttons - always visible, mobile-friendly */}
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleAdd(result)}
-                                    disabled={addingId === result.id}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-black font-medium transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
-                                    title="Add to Collection"
-                                >
-                                    {addingId === result.id ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Plus className="w-5 h-5 flex-shrink-0" />
-                                            <span className="hidden sm:inline">Collection</span>
-                                        </>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => handleAdd(result, false)}
-                                    disabled={addingId === result.id}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white/10 text-black font-medium transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 min-h-[48px]"
-                                    title="Add to Wishlist"
-                                >
-                                    {addingId === result.id ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Goal className="w-5 h-5 flex-shrink-0" />
-                                            <span className="hidden sm:inline">Wishlist</span>
-                                        </>
-                                    )}
-                                </button>
+                                {/* Action buttons - always visible, mobile-friendly */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleAdd(result)}
+                                        disabled={addingId === result.id}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-black font-medium transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                                        title="Add to Collection"
+                                    >
+                                        {addingId === result.id ? (
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Plus className="w-5 h-5 flex-shrink-0" />
+                                                <span className="hidden sm:inline">Collection</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => handleAdd(result, false)}
+                                        disabled={addingId === result.id}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white/10 text-black font-medium transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 min-h-[48px]"
+                                        title="Add to Wishlist"
+                                    >
+                                        {addingId === result.id ? (
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Goal className="w-5 h-5 flex-shrink-0" />
+                                                <span className="hidden sm:inline">Wishlist</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                ))}
+                        </motion.div>
+                    ))
+                )}
             </div>
 
             {results.length > 0 && (
@@ -196,9 +232,11 @@ export default function SearchInterface() {
             )}
 
             {results.length === 0 && !loading && query && (
-                <div className="text-center py-20 text-muted-foreground">
-                    No results found for "{query}"
-                </div>
+                <EmptyState
+                    icon={Disc}
+                    title="No results found"
+                    description={`We couldn't find any records for "${query}". Try searching for another artist or album.`}
+                />
             )}
         </div>
     )

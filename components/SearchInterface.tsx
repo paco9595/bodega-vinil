@@ -112,8 +112,8 @@ export default function SearchInterface() {
     // }
 
     return (
-        <div className="space-y-8">
-            <form onSubmit={(e) => handleSearch(e, 1)} className="relative max-w-2xl mx-auto flex gap-4">
+        <>
+            <form onSubmit={(e) => handleSearch(e, 1)} className="relative max-w-2xl mx-auto flex gap-4 mb-6">
                 <div className="relative flex-1">
                     <input
                         type="text"
@@ -134,7 +134,7 @@ export default function SearchInterface() {
                 </button>
             </form>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex-1 h-screen w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
                         <SkeletonCard key={i} />
@@ -238,6 +238,6 @@ export default function SearchInterface() {
                     description={`We couldn't find any records for "${query}". Try searching for another artist or album.`}
                 />
             )}
-        </div>
+        </>
     )
 }

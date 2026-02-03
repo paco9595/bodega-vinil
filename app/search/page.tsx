@@ -14,15 +14,13 @@ export default async function SearchPage() {
     const topArtist = await getTopArtists()
     const topTags = await getTopTags()
     return (
-        <div className="flex flex-col">
-            <main className="container mx-auto py-8">
-                <SearchInterface />
-                {/* <Carrusel records={recomendations || []} title="Recomendations" />
+        <main className="container mx-auto py-8 flex flex-col gap-8 px-4">
+            <SearchInterface />
+            {/* <Carrusel records={recomendations || []} title="Recomendations" />
                 <Carrusel records={topArtist || []} title="Top Artists" style='top' />
                 {topTags.map((tag: any) => (
                     <Carrusel key={tag.tag} records={tag.results || []} title={tag.tag} />
                 ))} */}
-            </main>
-        </div>
+        </main>
     )
 }

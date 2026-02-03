@@ -66,7 +66,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased mx-auto relative bg-[var(--bg)] grid grid-cols-1 ${user ? 'md:grid-cols-[256px_1fr]' : ''}`}
+        className={`${geistSans.variable} ${geistMono.variable} h-screen antialiased mx-auto relative bg-[var(--bg)] flex flex-col md:grid md:grid-cols-1 ${user ? 'md:grid-cols-[256px_1fr]' : ''}`}
       >
         <ThemeProvider>
           <script
@@ -81,7 +81,7 @@ export default async function RootLayout({
             }}
           />
           {user && <Sidebar />}
-          <div className="flex flex-col">
+          <div className="flex-1 flex flex-col">
             <Toaster />
             <Header />
             <div className="flex-1">

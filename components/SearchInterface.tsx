@@ -134,7 +134,7 @@ export default function SearchInterface() {
                 </button>
             </form>
 
-            <div className="flex-1 h-screen w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
                         <SkeletonCard key={i} />
@@ -146,7 +146,7 @@ export default function SearchInterface() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: index * 0.05 }}
-                            className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300"
+                            className="min-h-60 group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300"
                         >
                             <div className="aspect-square relative bg-black/40">
                                 {result.cover_image ? (

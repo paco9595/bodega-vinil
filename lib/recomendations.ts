@@ -37,6 +37,6 @@ function pickWeightedRandom(items: any[]) {
 }
 
 export async function getTopAlbums(): Promise<DiscogsSearchResponse> {
-    const results = await searchDiscogs(new URLSearchParams({ genre: "Rock", }).toString())
+    const results = await searchDiscogs(new URLSearchParams({ genre: "Rock", style: "Pop Rock", year: '1980', format: 'Vinyl', per_page: '20' }).toString())
     return results
 }

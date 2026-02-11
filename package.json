@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:ipv4": "set NODE_OPTIONS=--dns-result-order=ipv4first && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -22,6 +23,7 @@
     "react-webcam": "^7.2.0",
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
+    "undici": "^7.20.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

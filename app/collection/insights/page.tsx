@@ -19,8 +19,9 @@ export default async function InsightsPage() {
 
     if (!user) {
         return redirect('/')
+    } else {
+        console.log({ user })
     }
-
     // Fetch only owned vinyls for stats
     const { data: vinyls } = await supabase
         .from('vinyls')

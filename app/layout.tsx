@@ -84,7 +84,7 @@ export default async function RootLayout({
           <div className="flex-1 flex flex-col">
             <Toaster />
             <Header />
-            <div className="flex-1">
+            <div className="flex-1 overflow-hidden">
               {children}
             </div>
           </div>

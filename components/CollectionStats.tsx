@@ -12,7 +12,10 @@ import {
     ResponsiveContainer,
     PieChart,
     Pie,
-    Cell
+    Cell,
+    Label,
+    Sector,
+    PieSectorShapeProps
 } from 'recharts'
 import { Vinyl } from '@/lib/types/tables'
 import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
@@ -81,6 +84,9 @@ export default function CollectionStats({ vinyls }: CollectionStatsProps) {
         }
     }, [vinyls])
 
+    const MyCustomPie = (props: PieSectorShapeProps) => {
+        return <Sector {...props} fill={COLORS[props.index % COLORS.length]} />;
+    };
     if (stats.totalItems === 0) {
         return (
             <div className="text-center py-20 bg-white/5 rounded-xl border border-white/10">
@@ -157,17 +163,13 @@ export default function CollectionStats({ vinyls }: CollectionStatsProps) {
                                     cy="50%"
                                     labelLine={false}
                                     outerRadius={100}
-                                    fill="#8884d8"
                                     dataKey="value"
                                     label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                                >
-                                    {stats.genreData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
+                                    shape={MyCustomPie}
+                                />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'var(--bg)', border: '1px solid #333' }}
+                                    itemStyle={{ color: 'var(--text)' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -193,10 +195,10 @@ export default function CollectionStats({ vinyls }: CollectionStatsProps) {
                                     tick={{ fill: '#9ca3af', fontSize: 12 }}
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
+                                    contentStyle={{ backgroundColor: 'var(--bg)', border: '1px solid #333' }}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                 />
-                                <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]}>
+                                <Bar dataKey="value" fill="var(--text)" radius={[0, 4, 4, 0]}>
                                     {stats.artistData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}

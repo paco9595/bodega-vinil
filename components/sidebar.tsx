@@ -1,11 +1,10 @@
-import { Disc, Heart, Search } from "lucide-react";
+import { Disc, Heart, Search, User } from "lucide-react";
 import Link from "next/link";
-import LogoutButton from "./logout";
-import { createClient } from "@/utils/supabase/server";
+import AvatarUser from "./avatarUser";
+import useServerUser from "@/hooks/useServerUser";
 
 export default async function Sidebar() {
-
-
+    const { user } = await useServerUser()
     return (
         <div className="w-64 border-r px-4 py-6 hidden md:flex border-white/10 backdrop-blur-xl sticky top-0 h-screen flex-col">
             <Link href="/collection" className="flex items-center gap-2 font-bold text-xl">
@@ -13,6 +12,10 @@ export default async function Sidebar() {
                 <span>Vinyl Collection</span>
             </Link>
             <nav className="flex flex-col gap-2 mt-6 flex-1">
+                <Link href="/profile" className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium">
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
+                </Link>
                 <Link href="/collection" className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium">
                     <Disc className="w-4 h-4" />
                     <span>Collection</span>
@@ -27,7 +30,7 @@ export default async function Sidebar() {
                 </Link>
             </nav>
             <div >
-                <LogoutButton />
+                <AvatarUser user={user} />
             </div>
         </div>
     )

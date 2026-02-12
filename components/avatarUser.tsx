@@ -1,5 +1,4 @@
 export default function AvatarUser({ user }: any) {
-    console.log(user)
     return (
         <div className="flex items-center gap-2">
 

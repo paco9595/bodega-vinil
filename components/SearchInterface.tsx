@@ -128,7 +128,7 @@ export default function SearchInterface() {
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
-                    className="px-8 h-14 rounded-full bg-primary text-white font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center min-w-[100px]"
+                    className="hidden md:block px-8 h-14 rounded-full bg-primary text-white font-medium disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center min-w-[100px]"
                 >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search'}
                 </button>

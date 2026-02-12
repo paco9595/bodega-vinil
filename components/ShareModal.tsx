@@ -59,7 +59,7 @@ export default function ShareModal() {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-md bg-white border border-white/10 rounded-xl p-6 shadow-2xl">
+            <div className="relative w-full max-w-md bg-zinc-900/50 border border-white/10 rounded-xl p-6 shadow-2xl">
                 <button
                     onClick={() => setIsOpen(false)}
                     className="absolute right-4 top-4 text-muted-foreground hover:text-white transition-colors"

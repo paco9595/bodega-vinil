@@ -1,15 +1,13 @@
-import { DiscogsRelease } from "@/lib/validations/discogs";
+import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { Search } from "lucide-react";
 import { SearchResultItem } from "./searchResultItem";
 
 export function SearchResults({
     query,
-    results,
-    onSelectAlbum,
+    results
 }: {
     query: string;
     results: DiscogsRelease[];
-    onSelectAlbum: (id: number) => void;
 }) {
     if (!query) {
         return (
@@ -30,7 +28,6 @@ export function SearchResults({
                     <SearchResultItem
                         key={album.id}
                         album={album}
-                        onClick={() => onSelectAlbum(album.id)}
                     />
                 ))}
             </div>

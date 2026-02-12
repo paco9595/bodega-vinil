@@ -9,7 +9,6 @@ export async function searchDiscogs(query: string, page: number = 1, format: str
     const token = process.env.DISCOGS_TOKEN
     const key = process.env.DISCOGS_CONSUMER_KEY
     const secret = process.env.DISCOGS_CONSUMER_SECRET
-
     let authHeader = ''
     if (token) {
         authHeader = `Discogs token=${token}`

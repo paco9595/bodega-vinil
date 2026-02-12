@@ -4,26 +4,28 @@ import { DiscogsRelease } from '@/lib/types/DiscogsRelease'
 import { SearchBar } from '@/components/searchbar';
 import { SearchFilters } from '@/components/searchFilters';
 import { SearchResults } from '@/components/searchResults';
+import { searchDiscogs } from '@/lib/discogs';
 
 type SearchType = 'all' | 'album' | 'artist';
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<DiscogsRelease[]>([]);
-    const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [searchType, setSearchType] = useState<SearchType>('all');
     const [selectedGenre, setSelectedGenre] = useState('All');
     const [yearRange, setYearRange] = useState<[number, number]>([1950, 2024]);
 
-    useEffect(() => {
-        if (!query.trim()) {
-            setResults([]);
-            return;
-        }
-
+    const getSearchResults = async () => {
+        const searchParams = new URLSearchParams({
+            q: query,
+            type: searchType,
+            genre: selectedGenre,
+        });
+        const { results: searchResults } = await searchDiscogs(searchParams.toString(), 1, 'vinyl');
+        console.log({ searchResults });
         setResults(
-            results.filter((album) => {
+            searchResults.filter((album) => {
                 const q = query.toLowerCase();
 
                 if (
@@ -41,9 +43,15 @@ export default function SearchPage() {
                 return true;
             })
         );
-    }, [query, searchType, selectedGenre, yearRange]);
+    }
 
-    const selectedAlbum = results.find(a => a.id === selectedAlbumId);
+    useEffect(() => {
+        if (!query.trim()) {
+            setResults([]);
+            return;
+        }
+        getSearchResults();
+    }, [query, searchType, selectedGenre, yearRange]);
 
     return (
         <>
@@ -70,16 +78,8 @@ export default function SearchPage() {
                 <SearchResults
                     query={query}
                     results={results}
-                    onSelectAlbum={setSelectedAlbumId}
                 />
             </div>
-
-            {selectedAlbum && (
-                <AlbumDetailModal
-                    album={selectedAlbum}
-                    onClose={() => setSelectedAlbumId(null)}
-                />
-            )}
         </>
     );
 }

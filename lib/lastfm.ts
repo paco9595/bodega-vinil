@@ -16,15 +16,15 @@ export async function getTopArtists() {
 const TOP_GENRES = ['Rock', 'Pop', 'Hip Hop', 'Electronic']
 
 
-export async function getTopTags() {
-    const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptags&limit=20&api_key=${process.env.LASTFM_API_KEY}&format=json`)
-    const data = await res.json()
-        .then((data: any) => data.tags.tag || [])
-    const results = await Promise.all(
-        TOP_GENRES.map(async (tag: string) => ({
-            tag: tag,
-            results: await searchDiscogs(`genre=${tag}&per_page=20`).then((data: any) => data.results)
-        }))
-    )
-    return results
-}
+// export async function getTopTags() {
+//     const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptags&limit=20&api_key=${process.env.LASTFM_API_KEY}&format=json`)
+//     const data = await res.json()
+//         .then((data: any) => data.tags.tag || [])
+//     const results = await Promise.all(
+//         TOP_GENRES.map(async (tag: string) => ({
+//             tag: tag,
+//             results: await searchDiscogs(`genre=${tag}&per_page=20`).then((data: any) => data.results)
+//         }))
+//     )
+//     return results
+// }

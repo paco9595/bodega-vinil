@@ -1,58 +1,29 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, Grid3x3, List } from 'lucide-react';
 import { AlbumCardDrawer, AlbumDrawer } from '@/components/card';
-import { createClient } from '@/utils/supabase/client';
-import { DiscogsRelease } from '@/lib/types/DiscogsRelease';
-import { Vinyl } from '@/lib/types/tables';
+
+import useGetCollection from '@/hooks/useGetCollection';
+import { SortOption } from '@/components/sortOption';
 
 type ViewMode = 'grid' | 'table';
 type SortBy = 'title' | 'artist' | 'year';
 
 export default function DashboardPage() {
-    const supabase = createClient()
+
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
-    const [sortBy, setSortBy] = useState<SortBy>('title');
+
     const [showSortMenu, setShowSortMenu] = useState(false);
-    const [collection, setCollection] = useState<Vinyl[]>([])
+    const { collection, isLoading, setSortBy, sortBy } = useGetCollection({ sort: 'title' })
 
-    const getFetchCollection = async () => {
-        const { data } = await supabase
-            .from('vinyls')
-            .select('*')
-            .filter('owned', 'eq', true)
-            .order('created_at', { ascending: false })
-
-        if (data) {
-            console.log({ data })
-            setCollection(data)
-        }
-    }
-
-    useEffect(() => {
-        getFetchCollection()
-    }, [])
-
-    const sortedCollection = [...collection].sort((a, b) => {
-        switch (sortBy) {
-            case 'title':
-                return a.title.localeCompare(b.title);
-            case 'artist':
-                return a.artist.localeCompare(b.artist);
-            case 'year':
-                return (Number(b.year) || 0) - (Number(a.year) || 0);
-            default:
-                return 0;
-        }
-    });
-    // const { data: genres } = await supabase.from('genres').select('name')
+    console.log({ collection })
     return (
         <div className="min-h-screen bg-background">
             <main className="container mx-auto px-6 py-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
                     <div className="mb-6">
                         <h2 className="text-2xl font-light mb-2">My Collection</h2>
-                        <p className="text-zinc-400 text-sm">{[]?.length} albums</p>
+                        <p className="text-zinc-400 text-sm">{collection?.length} albums</p>
                     </div>
 
                     <div className='flex flex-col justify-center items-center w-full'>
@@ -123,7 +94,7 @@ export default function DashboardPage() {
                         {/* Grid View */}
                         {viewMode === 'grid' && (
                             <div className="grid grid-cols-2 gap-4">
-                                {sortedCollection.map((album) => (
+                                {collection.map((album) => (
                                     <AlbumCardDrawer
                                         key={album.id}
                                         album={album.release_data as any}
@@ -133,7 +104,7 @@ export default function DashboardPage() {
                         )}
                         {viewMode === 'table' && (
                             <div className="space-y-2">
-                                {sortedCollection.map((album) => (
+                                {collection.map((album) => (
                                     <AlbumDrawer
                                         key={album.id}
                                         album={album as any}
@@ -162,22 +133,4 @@ export default function DashboardPage() {
             </main>
         </div>
     )
-}
-
-interface SortOptionProps {
-    label: string;
-    active: boolean;
-    onClick: () => void;
-}
-
-function SortOption({ label, active, onClick }: SortOptionProps) {
-    return (
-        <button
-            onClick={onClick}
-            className={`w-full px-4 py-3 text-left text-sm hover:bg-zinc-800 transition-colors ${active ? 'text-amber-500' : 'text-zinc-300'
-                }`}
-        >
-            {label}
-        </button>
-    );
 }

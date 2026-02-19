@@ -18,6 +18,7 @@ export function SearchResults({
         );
     }
 
+
     return (
         <>
             <p className="text-sm text-zinc-400 mb-4">

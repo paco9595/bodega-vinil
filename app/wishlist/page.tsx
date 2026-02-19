@@ -1,12 +1,12 @@
 'use client'
-import VinylTable from "@/components/VinylTable"
 import { redirect, useSearchParams } from "next/navigation"
 import ShareModal from "@/components/ShareModal"
 import { createClient } from "@/utils/supabase/client"
 import { useEffect, useState, useMemo, useCallback, Suspense } from "react"
 import { Vinyl } from "@/lib/types/tables"
-import { DiscogsRelease } from "@/lib/validations/discogs"
-import { ArrowRight, Heart } from "lucide-react"
+import { Heart } from "lucide-react"
+import { WishListcart } from "@/components/wishListCart"
+import { toast } from "sonner"
 
 function WishListContent() {
     const [vinyls, setVinyls] = useState<Vinyl[]>([])
@@ -64,6 +64,21 @@ function WishListContent() {
         }
     }, []) // Empty dependency array - only run once
 
+    const addToCollection = async (albumId: string) => {
+        await fetch('api/update/table', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ albumId }),
+        }).then((res) => {
+
+            toast.success('Album added to collection')
+            setVinyls(vinyls.filter((album) => album.id !== albumId))
+        })
+
+    }
+
     return (
         <div className="container mx-auto px-6">
             <div className="flex items-center justify-between my-10">
@@ -76,7 +91,7 @@ function WishListContent() {
             {vinyls.length > 0 ? (
                 <div className="space-y-3">
                     {vinyls.map((album) => (
-                        <WishListcart key={album.id} album={album as any} addHandler={() => { }} />
+                        <WishListcart key={album.id} album={album as any} addHandler={addToCollection} />
                     ))}
                 </div>
             ) : (
@@ -97,33 +112,5 @@ export default function WishListPage() {
         <Suspense fallback={<div>Loading...</div>}>
             <WishListContent />
         </Suspense>
-    )
-}
-function WishListcart({ album, addHandler }: { album: DiscogsRelease & Partial<Vinyl>, addHandler: (albumId: number) => void }) {
-    const imageUrl = Array.isArray(album.images) ? album.images[0].uri : (album.cover_image ?? album.thumb);
-    return (
-        <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-900 transition-colors mb-8">
-            <button className="flex items-center gap-4 flex-1 min-w-0">
-                <img
-                    src={imageUrl}
-                    alt={album.title}
-                    className="w-20 h-20 rounded-xl object-cover shadow-lg"
-                />
-                <div className="flex-1 min-w-0 text-left">
-                    <p className="font-medium line-clamp-1">{album.title}</p>
-                    <p className="text-sm text-zinc-400 mt-0.5">{album.artist}</p>
-                    <p className="text-xs text-zinc-500 mt-1">
-                        {album.year} •
-                    </p>
-                </div>
-            </button>
-            <button
-                onClick={() => addHandler(album.id)}
-                className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition-colors"
-            >
-                <span>Add</span>
-                <ArrowRight className="w-4 h-4" />
-            </button>
-        </div>
     )
 }

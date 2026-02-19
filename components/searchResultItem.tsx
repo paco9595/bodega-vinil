@@ -2,21 +2,33 @@ import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { AlbumDrawer } from "./card";
+import { createClient } from "@/utils/supabase/client";
 
 interface SearchResultItemProps {
     album: DiscogsRelease;
 }
 
 export function SearchResultItem({ album }: SearchResultItemProps) {
+    const supabase = createClient();
     const [inCollection, setInCollection] = useState(false);
     const [inWishlist, setInWishlist] = useState(false);
+
+    const addToCollection = async (owned: boolean) => {
+        await fetch('/api/insert/item', {
+            method: 'POST',
+            body: JSON.stringify({
+                masterId: album.id,
+                owned,
+            })
+        })
+    }
 
     return (
         <div className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
             <AlbumDrawer album={album as any}>
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <img
-                        src={album?.images?.[0].uri || ''}
+                        src={album?.cover_image || ''}
                         alt={album.title}
                         className="w-16 h-16 rounded-lg object-cover shadow-lg flex-shrink-0"
                     />
@@ -34,6 +46,7 @@ export function SearchResultItem({ album }: SearchResultItemProps) {
                     onClick={(e) => {
                         e.stopPropagation();
                         setInCollection(!inCollection);
+                        addToCollection(true);
                     }}
                     className={`p-2 rounded-lg transition-colors ${inCollection
                         ? 'bg-amber-500 text-white'
@@ -46,6 +59,7 @@ export function SearchResultItem({ album }: SearchResultItemProps) {
                     onClick={(e) => {
                         e.stopPropagation();
                         setInWishlist(!inWishlist);
+                        addToCollection(false);
                     }}
                     className={`p-2 rounded-lg transition-colors ${inWishlist
                         ? 'bg-red-500 text-white'

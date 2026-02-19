@@ -1,67 +1,21 @@
-import { DiscogsRelease, DiscogsSearchResponse } from "./types/DiscogsRelease"
-import { DiscogsSearchResponseSchema, DiscogsReleaseSchema } from "./validations/discogs"
+'use server'
+import { DiscogsRelease } from "./types/DiscogsRelease"
+import { DiscogsReleaseSchema } from "./validations/discogs"
 
 
-export async function searchDiscogs(query: string, page: number = 1, format: string = 'vinyl'): Promise<DiscogsSearchResponse> {
-    if (!query) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
+export interface DiscogsSearchRequest {
+    q?: string,
+    searchType: 'all' | 'album' | "artist",
+    genre: string | null,
+    year?: number,
+    style?: string,
+    format?: string,
+    per_page: number
+}
+export async function searchDiscogs(query: DiscogsSearchRequest, page: number = 1): Promise<any> {
+    if (!query.q) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
+    return await fetch(`/api/discogs/search?${new URLSearchParams(query as any).toString()}`)
 
-    // Support both Token (if user has it) or Key/Secret (which user provided)
-    const token = process.env.DISCOGS_TOKEN
-    const key = process.env.DISCOGS_CONSUMER_KEY
-    const secret = process.env.DISCOGS_CONSUMER_SECRET
-    let authHeader = ''
-    if (token) {
-        authHeader = `Discogs token=${token}`
-    } else if (key && secret) {
-        authHeader = `Discogs key=${key}, secret=${secret}`
-    } else {
-        console.error('Discogs credentials missing. Set DISCOGS_TOKEN or DISCOGS_CONSUMER_KEY/SECRET')
-        return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
-    }
-
-    try {
-        let url = `https://api.discogs.com/database/search?${query}&type=master&page=${page}`
-        if (!query.includes('per_page')) {
-            url += `&per_page=12`
-        }
-        if (format && format !== 'all') {
-            url += `&format=${encodeURIComponent(format)}`
-        }
-
-        const res = await fetch(
-            url,
-            {
-                headers: {
-                    'User-Agent': 'VinylCollectionApp/1.0',
-                    'Authorization': authHeader
-                },
-            }
-        )
-
-        if (!res.ok) {
-            const errorText = await res.text()
-            console.error(`Discogs API Error: ${res.status} ${res.statusText}`, errorText)
-            throw new Error(`Failed to fetch from Discogs: ${res.status}`)
-        }
-
-        const data = await res.json()
-
-        // Validate with Zod
-        const validated = DiscogsSearchResponseSchema.safeParse(data)
-        if (!validated.success) {
-            console.error('Discogs API Validation Error:', validated.error)
-            // Fallback: try to return raw data if it looks somewhat correct, or empty
-            return {
-                results: (data.results || []) as any,
-                pagination: data.pagination || { page: 1, pages: 1, per_page: 12, items: 0 }
-            }
-        }
-
-        return validated.data as unknown as DiscogsSearchResponse
-    } catch (error) {
-        console.error('Discogs search error:', error)
-        return { results: [], pagination: { page: 1, pages: 1, per_page: 12, items: 0 } }
-    }
 }
 
 

@@ -37,7 +37,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
     // If vinyl not found in database, try to get it from Discogs
     if (!vinyl) {
         // Assume id_album is a Discogs release ID
-        release = await getRelease(Number(id_album))
+        release = await getRelease(id_album)
 
         if (!release) {
             return <div className="p-8 text-center">Album not found</div>

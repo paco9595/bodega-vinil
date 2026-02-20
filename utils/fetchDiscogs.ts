@@ -2,10 +2,11 @@ const KEY = process.env.DISCOGS_CONSUMER_KEY
 const SECRET = process.env.DISCOGS_CONSUMER_SECRET
 
 export async function getFetchDiscogs(url: string) {
-    let authHeader = ''
-    if (KEY && SECRET) {
-        authHeader = `Discogs key=${KEY}, secret=${SECRET}`
-    } else {
+    if (!url) {
+        console.error('URL is required')
+        return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
+    }
+    if (!KEY || !SECRET) {
         console.error('Discogs credentials missing. Set DISCOGS_TOKEN or DISCOGS_CONSUMER_KEY/SECRET')
         return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
     }
@@ -13,7 +14,7 @@ export async function getFetchDiscogs(url: string) {
         url,
         {
             headers: {
-                Authorization: authHeader,
+                Authorization: `Discogs key=${KEY}, secret=${SECRET}`,
                 'User-Agent': 'VinylCollectionApp/1.0 (contact: francisco@email.com)',
             },
             cache: 'no-store',

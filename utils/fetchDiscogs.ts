@@ -1,12 +1,9 @@
-const TOKEN = process.env.NEXT_PUBLIC_DISCOGS_TOKEN
-const KEY = process.env.NEXT_PUBLIC_DISCOGS_CONSUMER_KEY
-const SECRET = process.env.NEXT_PUBLIC_DISCOGS_CONSUMER_SECRET
+const KEY = process.env.DISCOGS_CONSUMER_KEY
+const SECRET = process.env.DISCOGS_CONSUMER_SECRET
 
 export async function getFetchDiscogs(url: string) {
     let authHeader = ''
-    if (TOKEN) {
-        authHeader = `Discogs token=${TOKEN}`
-    } else if (KEY && SECRET) {
+    if (KEY && SECRET) {
         authHeader = `Discogs key=${KEY}, secret=${SECRET}`
     } else {
         console.error('Discogs credentials missing. Set DISCOGS_TOKEN or DISCOGS_CONSUMER_KEY/SECRET')

@@ -25,16 +25,23 @@ export async function getRelease(id: number | string): Promise<DiscogsRelease | 
             `https://api.discogs.com/masters/${id}`,
             { next: { revalidate: 86400 } }
         )
+
+        if (data.message) {
+            // Usually Discogs error responses like "Release not found."
+            // We just return null and don't spam validation errors.
+            return null
+        }
+
         const validated = DiscogsReleaseSchema.safeParse(data)
 
         if (!validated.success) {
-            console.error('Discogs API Validation Error (Release):', validated.error)
+            console.error(`Discogs API Validation Error (Release ${id}):`, validated.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', '))
             return null
         }
 
         return validated.data as any // Cast because Zod inference might be slightly stricter or loose compared to original interface
     } catch (error) {
-        console.error('Discogs release error:', error)
+        console.error('Discogs release fetch failed for id:', id, error)
         return null
     }
 }

@@ -4,7 +4,6 @@ import { searchDiscogs } from "@/lib/discogs"
 
 export default async function DiscoverPage() {
     const { results } = await searchDiscogs({ genre: "Rock", style: "Pop Rock", searchType: 'album', year: 1980, format: 'Vinyl,album', per_page: 6 })
-    console.log({ results })
     return (
         <div className="container mx-auto px-4 mt-8">
             <HeroCard />

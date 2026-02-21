@@ -9,8 +9,5 @@ const path3 = 'node_modules/next/dist/compiled/browserslist/index.js';
         let content = fs.readFileSync(path, 'utf8');
         content = content.split('console.warn').join('null && console.warn');
         fs.writeFileSync(path, content, 'utf8');
-        console.log(`Patched ${path} to suppress stale age warning.`);
-    } else {
-        console.log(`${path} not found. Did not patch.`);
     }
 });

@@ -2,26 +2,18 @@ import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { AlbumDrawer } from "./card";
-import { createClient } from "@/utils/supabase/client";
+import useWishlist from "@/hooks/useWistList";
 
 interface SearchResultItemProps {
     album: DiscogsRelease;
+    initialInCollection?: boolean;
+    initialInWishlist?: boolean;
 }
 
-export function SearchResultItem({ album }: SearchResultItemProps) {
-    const supabase = createClient();
-    const [inCollection, setInCollection] = useState(false);
-    const [inWishlist, setInWishlist] = useState(false);
-
-    const addToCollection = async (owned: boolean) => {
-        await fetch('/api/insert/item', {
-            method: 'POST',
-            body: JSON.stringify({
-                masterId: album.id,
-                owned,
-            })
-        })
-    }
+export function SearchResultItem({ album, initialInCollection = false, initialInWishlist = false }: SearchResultItemProps) {
+    const [inCollection, setInCollection] = useState(initialInCollection);
+    const [inWishlist, setInWishlist] = useState(initialInWishlist);
+    const { addToCollectionFromSearch } = useWishlist()
 
     return (
         <div className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
@@ -36,7 +28,7 @@ export function SearchResultItem({ album }: SearchResultItemProps) {
                         <p className="font-medium text-sm line-clamp-1">{album.title}</p>
                         <p className="text-xs text-zinc-400">{album.artists?.[0].name}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">
-                            {album?.year} • {album?.genres?.[0]}
+                            {album?.year} • {album?.id}
                         </p>
                     </div>
                 </div>
@@ -46,7 +38,7 @@ export function SearchResultItem({ album }: SearchResultItemProps) {
                     onClick={(e) => {
                         e.stopPropagation();
                         setInCollection(!inCollection);
-                        addToCollection(true);
+                        addToCollectionFromSearch(album.id, true);
                     }}
                     className={`p-2 rounded-lg transition-colors ${inCollection
                         ? 'bg-amber-500 text-white'
@@ -59,7 +51,7 @@ export function SearchResultItem({ album }: SearchResultItemProps) {
                     onClick={(e) => {
                         e.stopPropagation();
                         setInWishlist(!inWishlist);
-                        addToCollection(false);
+                        addToCollectionFromSearch(album.id, false);
                     }}
                     className={`p-2 rounded-lg transition-colors ${inWishlist
                         ? 'bg-red-500 text-white'

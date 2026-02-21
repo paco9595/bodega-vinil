@@ -62,7 +62,7 @@ export async function SideDrawer() {
                         <div className="py-8">
                             <ul>
                                 <li className="pb-8">
-                                    <Link href="/collection" className="flex items-center gap-2">
+                                    <Link href="/profile" className="flex items-center gap-2">
                                         <User />
                                         <div>Profile</div>
                                     </Link>

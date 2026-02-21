@@ -25,5 +25,35 @@ export async function getFetchDiscogs(url: string, options?: RequestInit) {
         fetchOptions.cache = 'no-store'
     }
 
-    return await fetch(url, fetchOptions).then(res => res.json())
+    let attempt = 0;
+    let lastResText = "";
+
+    while (attempt < 3) {
+        try {
+            const res = await fetch(url, fetchOptions);
+            lastResText = await res.text();
+
+            if (res.status === 429 || res.status === 502 || res.status === 503) {
+                console.warn(`Discogs API ${res.status} on ${url}. Retrying in 3 seconds... (Attempt ${attempt + 1})`);
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                attempt++;
+                continue;
+            }
+
+            try {
+                // If it's completely empty on 204 or something, return empty object
+                if (!lastResText) return {};
+                return JSON.parse(lastResText);
+            } catch (e) {
+                console.error(`Discogs JSON parse failed for ${url}. Status: ${res.status}. Body: ${lastResText.substring(0, 150)}`);
+                return { message: "Invalid JSON response" };
+            }
+        } catch (error) {
+            console.error(`Fetch request failed for ${url} on attempt ${attempt + 1}:`, error);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            attempt++;
+        }
+    }
+
+    return { message: "API Failed after retries" };
 }

@@ -6,6 +6,7 @@ import { Toaster } from "@/providers/sonner";
 import { ThemeProvider } from "@/providers/themeProvider";
 import Sidebar from "@/components/sidebar";
 import { createClient } from "@/utils/supabase/server";
+import { ModalProvider } from "@/providers/modalProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -83,10 +84,12 @@ export default async function RootLayout({
           {user && <Sidebar />}
           <div className="flex-1 flex flex-col">
             <Toaster />
-            <Header />
-            <div className="flex-1 overflow-hidden">
-              {children}
-            </div>
+            <ModalProvider>
+              <Header />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {children}
+              </div>
+            </ModalProvider>
           </div>
         </ThemeProvider>
         {/* <Toaster /> */}

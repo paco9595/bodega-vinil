@@ -1,4 +1,5 @@
-'use server'
+
+import { getFetchDiscogs } from "@/utils/fetchDiscogs"
 import { DiscogsRelease } from "./types/DiscogsRelease"
 import { DiscogsReleaseSchema } from "./validations/discogs"
 
@@ -12,16 +13,18 @@ export interface DiscogsSearchRequest {
     format?: string,
     per_page: number
 }
-export async function searchDiscogs(query: DiscogsSearchRequest, page: number = 1): Promise<any> {
-    if (!query.q) return { results: [], pagination: { page: 1, pages: 1, per_page: 50, items: 0 } }
-    return await fetch(`/api/discogs/search?${new URLSearchParams(query as any).toString()}`)
+export async function searchDiscogs(query: DiscogsSearchRequest): Promise<any> {
+    return fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/discogs/search?${new URLSearchParams(query as any).toString()}`).then(res => res.json())
 
 }
 
 
 export async function getRelease(id: number | string): Promise<DiscogsRelease | null> {
     try {
-        const data = await fetch(`/api/discogs/master/${id}`)
+        const data = await getFetchDiscogs(
+            `https://api.discogs.com/masters/${id}`,
+            { next: { revalidate: 86400 } }
+        )
         const validated = DiscogsReleaseSchema.safeParse(data)
 
         if (!validated.success) {

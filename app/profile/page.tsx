@@ -12,7 +12,7 @@ export default async function ProfilePage() {
     return (
         <main className="container mx-auto px-6 py-8">
             <div className="flex items-center gap-2 mt-8 mb-12">
-                <img src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} className="w-24 h-24 rounded-full" />
+                <img src={user?.identities?.[0]?.identity_data?.avatar_url} alt={user?.user_metadata?.full_name} className="w-24 h-24 rounded-full" />
                 <div className="ml-4">
                     <p className="font-semibold text-2xl">{user?.user_metadata?.full_name}</p>
                     <p className="font-semibold text-2xl">{user?.user_metadata?.email}</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Vinyl } from '@/lib/types/tables'
 import { Disc, Shuffle, X } from 'lucide-react'
 import Image from 'next/image'
@@ -8,22 +8,32 @@ import Link from 'next/link'
 
 interface SpinRecordProps {
     vinyls: Vinyl[]
+    trigger?: number
+    onSpinStateChange?: (isSpinning: boolean) => void
 }
 
-export default function SpinRecord({ vinyls }: SpinRecordProps) {
+export default function SpinRecord({ vinyls, trigger, onSpinStateChange }: SpinRecordProps) {
     const [selectedVinyl, setSelectedVinyl] = useState<Vinyl | null>(null)
     const [isSpinning, setIsSpinning] = useState(false)
+
+    useEffect(() => {
+        if (trigger && trigger > 0) {
+            spinRecord()
+        }
+    }, [trigger])
 
     const spinRecord = () => {
         if (vinyls.length === 0) return
 
         setIsSpinning(true)
+        onSpinStateChange?.(true)
 
         // Simulate spinning animation
         setTimeout(() => {
             const randomIndex = Math.floor(Math.random() * vinyls.length)
             setSelectedVinyl(vinyls[randomIndex])
             setIsSpinning(false)
+            onSpinStateChange?.(false)
         }, 1000)
     }
 
@@ -33,15 +43,6 @@ export default function SpinRecord({ vinyls }: SpinRecordProps) {
 
     return (
         <>
-            <button
-                onClick={spinRecord}
-                disabled={isSpinning || vinyls.length === 0}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-black font-semibold rounded-full hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
-                {isSpinning ? 'Spinning...' : 'Spin a Record'}
-            </button>
-
             {/* Modal */}
             {selectedVinyl && (
                 <div

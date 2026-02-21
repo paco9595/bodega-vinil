@@ -1,21 +1,22 @@
 import { createClient } from '@/utils/supabase/client';
-import { DiscogsRelease } from '@/lib/types/DiscogsRelease';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Vinyl } from '@/lib/types/tables';
+import { NormalizeString } from '@/utils/utilits';
 
 type SortBy = 'title' | 'artist' | 'year';
 
-export default function useGetCollection({ sort = 'title' }: { sort: SortBy }) {
+export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
     const [collection, setCollection] = useState<Vinyl[]>([])
-    const [erorr, setError] = useState({})
+    const [error, setError] = useState(null)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [sortBy, setSortBy] = useState<SortBy>(sort);
+    const [filterBy, setFilterBy] = useState<string>('')
     const supabase = createClient()
 
 
     useEffect(() => {
         getData()
-    }, [sortBy])
+    }, [])
 
 
     const getData = async () => {
@@ -50,7 +51,31 @@ export default function useGetCollection({ sort = 'title' }: { sort: SortBy }) {
             setIsLoading(false)
         }
     }
+    const filteredCollection = useMemo(() => {
+        if (!filterBy) return collection
+        const normalizedFilter = NormalizeString(filterBy)
+        return collection.filter(album =>
+            NormalizeString(album.title).includes(normalizedFilter) ||
+            NormalizeString(album.artist).includes(normalizedFilter) ||
+            NormalizeString(album.year || '').includes(normalizedFilter)
+        )
+    }, [collection, filterBy])
 
-    return { collection, isLoading, erorr, setSortBy, sortBy }
+    const sortedCollection = useMemo(() => {
+        if (!sortBy) return filteredCollection
+        return [...filteredCollection].sort((a, b) => {
+            switch (sortBy) {
+                case 'title':
+                    return a.title.localeCompare(b.title);
+                case 'artist':
+                    return a.artist.localeCompare(b.artist);
+                case 'year':
+                    return (Number(b.year) || 0) - (Number(a.year) || 0);
+                default:
+                    return 0;
+            }
+        })
+    }, [collection, sortBy, filteredCollection])
+    return { collection: sortedCollection, isLoading, error, setSortBy, sortBy, filterBy, setFilterBy }
 
 }

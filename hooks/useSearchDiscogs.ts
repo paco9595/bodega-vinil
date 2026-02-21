@@ -13,7 +13,7 @@ export interface DiscogsSearchRequest {
 
 export function useSearchDiscogs(query: DiscogsSearchRequest) {
     const [results, setResults] = useState<DiscogsRelease[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [pagination, setPagination] = useState<any>(null);
     const [currentPage, setCurrentPage] = useState(query.pagination);
@@ -60,5 +60,5 @@ export function useSearchDiscogs(query: DiscogsSearchRequest) {
         }
     }, [debouncedQuery])
 
-    return { results, loading, error, pagination, currentPage, setCurrentPage };
+    return { results, isLoading, error, pagination, currentPage, setCurrentPage };
 }

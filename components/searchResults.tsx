@@ -4,11 +4,16 @@ import { SearchResultItem } from "./searchResultItem";
 
 export function SearchResults({
     query,
-    results
+    results,
+    collectionIds,
+    wishlistIds
 }: {
     query: string;
     results: DiscogsRelease[];
+    collectionIds: Set<number | null>;
+    wishlistIds: Set<number | null>;
 }) {
+    console.log({ collectionIds, wishlistIds, results })
     if (!query) {
         return (
             <div className="text-center py-16">
@@ -29,6 +34,8 @@ export function SearchResults({
                     <SearchResultItem
                         key={album.id}
                         album={album}
+                        initialInCollection={collectionIds.has(album.id)}
+                        initialInWishlist={wishlistIds.has(album.id)}
                     />
                 ))}
             </div>

@@ -1,13 +1,14 @@
 'use client'
 import { useState } from 'react';
-import { ChevronDown, Grid3x3, List } from 'lucide-react';
+import { ChevronDown, Grid3x3, List, Disc3 } from 'lucide-react';
 import { AlbumCardDrawer, AlbumDrawer } from '@/components/card';
+import CrateDiggingView from '@/components/CrateDigging';
 
 import useCollection from '@/hooks/useGetCollection';
 import { SortOption } from '@/components/sortOption';
 import { Spinner } from '@/components/ui/spinner';
 
-type ViewMode = 'grid' | 'table';
+type ViewMode = 'grid' | 'table' | 'crate';
 
 export default function DashboardPage() {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -95,6 +96,15 @@ export default function DashboardPage() {
                                     >
                                         <List className="w-5 h-5" />
                                     </button>
+                                    <button
+                                        onClick={() => setViewMode('crate')}
+                                        className={`p-2 rounded-lg transition-colors ${viewMode === 'crate'
+                                            ? 'bg-amber-500 text-white'
+                                            : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                                            }`}
+                                    >
+                                        <Disc3 className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </div>
 
@@ -134,6 +144,17 @@ export default function DashboardPage() {
                                         </AlbumDrawer>
                                     ))}
                                 </div>
+                            )}
+                            {viewMode === 'crate' && (
+                                <CrateDiggingView
+                                    collection={collection.map(album => ({
+                                        id: album.id,
+                                        title: album.title,
+                                        artist: album.artist,
+                                        coverImage: album.cover_image || '',
+                                        year: album.year || ''
+                                    }))}
+                                />
                             )}
                         </div>
                     </div>

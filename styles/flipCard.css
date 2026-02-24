@@ -1,0 +1,52 @@
+.diggingView {
+    position: relative;
+    background: red;
+    flex: 1;
+    /* Flexbox para centrar perfectamente las tarjetas apiladas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1200px;
+    /* Un poco más de perspectiva para el efecto 3D */
+    min-height: 600px;
+}
+
+.card {
+    width: 300px;
+    height: 300px;
+    transform-style: preserve-3d;
+    /* Position absolute es crucial para que queden una encima de otra (stack) */
+    position: absolute;
+
+    /* Efecto de grosor sólido (Lomo del disco) */
+
+
+    /* Establecemos el origen de rotación para que gire desde su base (el fondo de la caja) */
+    transform-origin: bottom center;
+
+    /* En lugar de keyframes estáticos, una transición fluida que maneja el scroll bi-direccionalmente */
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+}
+
+/* 1. Discos que ya pasamos (Montón de enfrente): Se acuestan bastante y se bajan para no bloquear la vista del activo */
+.card.passed {
+    /* rotateX(-75deg) los tumba hacia adelante casi por completo sobre la mesa */
+    /* translateY(150px) los empuja hacia abajo pero manteniendo la mitad de su cuerpo visible */
+    transform: rotateX(-75deg) translateZ(calc(120px + (20px * var(--visual-index)))) translateY(calc(150px + (25px * var(--visual-index))));
+    opacity: 1;
+    pointer-events: none;
+}
+
+/* 2. Disco actual que estamos viendo: Se levanta para estar de frente y se acerca al usuario */
+.card.active {
+    /* Lo acercamos más y lo subimos levemente para que se vea perfectamente recto y en primer plano */
+    transform: rotateX(0deg) translateZ(200px) translateY(-50px);
+    opacity: 1;
+}
+
+/* 3. Discos que siguen en la caja esperando: Se inclinan ligeramente hacia atrás haciendo fila */
+.card.stacked {
+    /* Usamos una variable CSS para empujar cada disco más atrás dependiendo de su turno */
+    transform: rotateX(15deg) translateZ(calc(-40px * var(--visual-index))) translateY(calc(-10px * var(--visual-index)));
+    opacity: 1;
+}

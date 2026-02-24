@@ -20,7 +20,7 @@ export default function DashboardPage() {
             <main className="container mx-auto px-6 py-8">
 
                 {!isLoading && !error &&
-                    (<div className="flex flex-col max-w-7xl m-auto items-start md:items-center justify-between mb-8">
+                    (<div className="flex flex-1 flex-col max-w-7xl m-auto items-start md:items-center justify-between mb-8">
                         <div className="mb-6">
                             <h2 className="text-2xl font-light mb-2">My Collection</h2>
                             <p className="text-zinc-400 text-sm">{collection?.length} albums</p>

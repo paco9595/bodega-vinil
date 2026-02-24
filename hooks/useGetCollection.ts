@@ -21,10 +21,10 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
         try {
             setIsLoading(true)
             const { data, error } = await fetch('/api/get/collection').then(res => res.json())
-            // console.log({ data, error })
-            // if (error) throw Error(error)
-            // const sortedCollection = sortArray(data || [], sortBy)
-            // setCollection(sortedCollection)
+            console.log({ data, error })
+            if (error) throw Error(error)
+            const sortedCollection = sortArray(data || [], sortBy)
+            setCollection(sortedCollection)
 
         } catch (e: any) {
             console.error(e)
@@ -49,6 +49,7 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
         if (!sortBy) return filteredCollection
         return sortArray(filteredCollection, sortBy)
     }, [collection, sortBy, filteredCollection])
+
     return { collection: sortedCollection, isLoading, error, setSortBy, sortBy, filterBy, setFilterBy }
 
 }

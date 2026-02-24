@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react';
-import { ChevronDown, Grid3x3, List, Disc } from 'lucide-react';
+import { ChevronDown, Grid3x3, List, Disc, Disc3 } from 'lucide-react';
 import { AlbumCardDrawer, AlbumDrawer } from '@/components/card';
 import EmptyState from '@/components/EmptyState';
 import CrateDiggingView from '@/components/CrateDigging';

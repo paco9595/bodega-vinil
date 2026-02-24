@@ -20,14 +20,11 @@ export default function useWishlist() {
         if (!user) {
             return redirect('/')
         }
-        const { data } = await supabase
-            .from('vinyls')
-            .select('*')
-            .filter('owned', 'eq', false)
-            .order('created_at', { ascending: false })
+        const { data, error } = await fetch('/api/get/wishlist').then(res => res.json())
+        if (error) throw Error(error)
         setWishList(data || [])
-        const { data: DataGenres } = await supabase.from('genres').select('name')
-        setGenres(DataGenres?.map((genre) => genre.name) || [])
+        const { data: DataGenres } = await fetch('/api/get/genres').then(res => res.json())
+        setGenres(DataGenres?.map((genre: { name: string }) => genre?.name) || [])
     }, [supabase])
 
     const verifyToken = useCallback(async () => {
@@ -38,8 +35,8 @@ export default function useWishlist() {
             return redirect('/not-found')
         }
         setWishList(vinyls || [])
-        const { data: DataGenres } = await supabase.from('genres').select('name')
-        setGenres(DataGenres?.map((genre) => genre.name) || [])
+        const { data: DataGenres } = await fetch('/api/get/genres').then(res => res.json())
+        setGenres(DataGenres?.map((genre: { name: string }) => genre?.name) || [])
     }, [token, supabase])
 
     useEffect(() => {
@@ -61,7 +58,7 @@ export default function useWishlist() {
     }, [token, verifyToken, verifyAuth])
 
     const addToCollectionFormWishList = async (albumId: string) => {
-        await fetch('api/update/table', {
+        await fetch('/api/update/table', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

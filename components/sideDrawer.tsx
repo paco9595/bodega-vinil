@@ -17,6 +17,27 @@ import Link from "next/link"
 export async function SideDrawer() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+
+    let collectionCount = 0
+    let wishlistCount = 0
+
+    if (user) {
+        const [{ count: cCount }, { count: wCount }] = await Promise.all([
+            supabase
+                .from("vinyls")
+                .select("*", { count: "exact", head: true })
+                .eq("user_id", user.id)
+                .eq("owned", true),
+            supabase
+                .from("vinyls")
+                .select("*", { count: "exact", head: true })
+                .eq("user_id", user.id)
+                .eq("owned", false),
+        ])
+        collectionCount = cCount || 0
+        wishlistCount = wCount || 0
+    }
+
     return (
         <Drawer
             direction={"left"}
@@ -49,11 +70,11 @@ export async function SideDrawer() {
                             <div className="flex gap-4">
                                 <div>
                                     <div className="font-light text-lg text-white/50">Collection</div>
-                                    <div className="font-bold text-lg">41</div>
+                                    <div className="font-bold text-lg">{collectionCount}</div>
                                 </div>
                                 <div>
                                     <div className="font-light text-lg text-white/50">Wish List</div>
-                                    <div className="font-bold text-lg">100</div>
+                                    <div className="font-bold text-lg">{wishlistCount}</div>
                                 </div>
                             </div>
                         </div>

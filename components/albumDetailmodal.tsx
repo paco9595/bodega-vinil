@@ -22,7 +22,6 @@ export default function AlbumDetailModal({ album }: AlbumDetailModalProps) {
             if (id) {
                 try {
                     const data = await getTracks(id.toString());
-                    console.log({ tracklist: data.tracklist });
                     setTracklist(data.tracklist || []);
                 } catch (error) {
                     console.error("Failed to fetch tracks", error);

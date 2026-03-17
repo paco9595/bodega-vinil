@@ -8,7 +8,6 @@ export default async function ProfilePage() {
         .from('vinyls')
         .select('*')
         .filter('owned', 'eq', true)
-    console.log(user)
     return (
         <main className="container mx-auto px-6 py-8">
             <div className="flex items-center gap-2 mt-8 mb-12">

@@ -21,7 +21,6 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
         try {
             setIsLoading(true)
             const { data, error } = await fetch('/api/get/collection').then(res => res.json())
-            console.log({ data, error })
             if (error) throw Error(error)
             const sortedCollection = sortArray(data || [], sortBy)
             setCollection(sortedCollection)

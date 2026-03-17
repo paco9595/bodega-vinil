@@ -1,6 +1,6 @@
 .diggingView {
     position: relative;
-    background: red;
+    background: transparent;
     flex: 1;
     /* Flexbox para centrar perfectamente las tarjetas apiladas */
     display: flex;
@@ -8,12 +8,18 @@
     align-items: center;
     perspective: 1200px;
     /* Un poco más de perspectiva para el efecto 3D */
-    min-height: 600px;
+    min-height: 50vh;
+    height: calc(100vh - 200px);
+    width: 100%;
+    overflow: hidden;
+    touch-action: none; /* Previene el scroll táctil del navegador */
 }
 
 .card {
-    width: 300px;
-    height: 300px;
+    /* El tamaño se ajusta a la pantalla (clamp para tener un mínimo y máximo) */
+    width: clamp(200px, 70vw, 45vh);
+    height: clamp(200px, 70vw, 45vh);
+    aspect-ratio: 1 / 1;
     transform-style: preserve-3d;
     /* Position absolute es crucial para que queden una encima de otra (stack) */
     position: absolute;

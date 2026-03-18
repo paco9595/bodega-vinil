@@ -1,6 +1,7 @@
 import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { Search } from "lucide-react";
 import { SearchResultItem } from "./searchResultItem";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function SearchResults({
     query,
@@ -28,16 +29,18 @@ export function SearchResults({
             <p className="text-sm text-zinc-400 mb-4">
                 {results.length} result{results.length !== 1 && 's'}
             </p>
-            <div className="space-y-2">
-                {results.map(album => (
-                    <SearchResultItem
-                        key={album.id}
-                        album={album}
-                        initialInCollection={collectionIds.has(album.id)}
-                        initialInWishlist={wishlistIds.has(album.id)}
-                    />
-                ))}
-            </div>
+            <motion.div layout className="space-y-2">
+                <AnimatePresence>
+                    {results.map(album => (
+                        <SearchResultItem
+                            key={album.id}
+                            album={album}
+                            initialInCollection={collectionIds.has(album.id)}
+                            initialInWishlist={wishlistIds.has(album.id)}
+                        />
+                    ))}
+                </AnimatePresence>
+            </motion.div>
         </>
     );
 }

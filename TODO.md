@@ -41,3 +41,26 @@ Este documento lista las mejoras sugeridas y nuevas funcionalidades para llevar 
 
 - [ ] **Recomendaciones**: Sugerir discos basados en lo que ya está en la colección ("Si te gusta X, te gustará Y").
 - [ ] **Novedades**: Sección de "Próximos lanzamientos" o "Trending" en vinilo.
+
+### 🗄️ Organización Físico y Mantenimiento
+
+- [ ] **Gestión de Ubicación (Storage Mapping)**: Asignar una ubicación física (ej. "Estantería A", "Caja 3") para colecciones grandes.
+- [ ] **Sistema de Calificación (Goldmine Grading)**: Registo del estado exacto del disco (Mint, VG+, G) y estado de la funda.
+- [ ] **Registro de Limpieza**: Log para registrar el mantenimiento (último lavado, cambio de fundas antiestáticas).
+- [ ] **Gestión de Préstamos**: Módulo para registrar discos prestados con fechas y nombres.
+
+### 💸 Mercado, Valor y Wishlist Avanzada
+
+- [ ] **Alertas de Precio (Price Tracker)**: Notificaciones si un vinilo de la Wishlist baja de precio en el marketplace.
+- [ ] **ROI de la Colección**: Evolución de gráfica "Precio de compra" vs "Valor de mercado en Discogs".
+
+### 🎮 Gamificación y Experiencia Premium (UI/UX)
+
+- [x] **Vista "Crate Digging"**: Interfaz táctil inmersiva (*cover flow*) imitando rebuscar en cajones de discos.
+- [ ] **Logros e Insignias (Badges)**: Medallas por hitos logrados (ej. "Cien Club", "Completista", "First Press Hunter").
+- [ ] **Metas de Colección (Goals)**: Ej. "Conseguir toda la discografía de X artista" con barra de progreso.
+
+### 🎧 Hábitos de Escucha (Social & Tracking)
+
+- [ ] **"Now Spinning" / Play History**: Botón para registrar escuchas y generar estadísticas ("Spotify Wrapped" analógico).
+- [ ] **Cajas Curadas / Sesiones**: Agrupaciones (ej. "Tarde de Lluvia", "Audiophile Testing") para planear sesiones de escucha.

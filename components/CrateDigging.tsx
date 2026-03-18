@@ -1,7 +1,7 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import '@/styles/flipCard.css'
-
+import { AlbumDrawer } from '@/components/card';
 interface CrateItem {
     id: string | number;
     title: string;
@@ -19,6 +19,25 @@ export default function CrateDiggingView({ collection }: { collection: CrateItem
 
     // Referencias para el touch (pantalla táctil)
     const touchStartY = useRef<number | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const preventScroll = (e: Event) => {
+            e.preventDefault();
+        };
+
+        // Se usa passive: false para poder cancelar el scroll nativo del navegador (pull-to-refresh o scroll general)
+        el.addEventListener('touchmove', preventScroll, { passive: false });
+        el.addEventListener('wheel', preventScroll, { passive: false });
+
+        return () => {
+            el.removeEventListener('touchmove', preventScroll);
+            el.removeEventListener('wheel', preventScroll);
+        };
+    }, []);
 
     // -- SCROLL (Ratón y Trackpad) --
     const handleWheel = (e: React.WheelEvent) => {
@@ -66,6 +85,7 @@ export default function CrateDiggingView({ collection }: { collection: CrateItem
 
     return (
         <div
+            ref={containerRef}
             className="diggingView"
             onWheel={handleWheel}
             onTouchStart={handleTouchStart}
@@ -83,24 +103,26 @@ export default function CrateDiggingView({ collection }: { collection: CrateItem
                 const visualIndex = Math.abs(index - activeIndex);
 
                 return (
-                    <div
-                        key={item.id}
-                        className={`card ${status}`}
-                        style={{
-                            // Muy importante: 100 - index obliga a que el vinilo 0 siempre tape al vinilo 1
-                            // Así los vemos apilados correctamente uno frente al otro en la caja real
-                            zIndex: 100 - index,
-                            // Pasamos visualIndex como variable CSS para calcular profundidad y sombra
-                            '--visual-index': visualIndex
-                        } as React.CSSProperties}
-                    >
-                        <div className="card-inner">
-                            <div className="card-front">
-                                <img src={item.coverImage} alt={item.title} />
-                            </div>
+                    <AlbumDrawer album={item as any} key={`${item.id}-${index}`}>
+                        <div
+                            key={item.id}
+                            className={`card ${status}`}
+                            style={{
+                                // Muy importante: 100 - index obliga a que el vinilo 0 siempre tape al vinilo 1
+                                // Así los vemos apilados correctamente uno frente al otro en la caja real
+                                zIndex: 100 - index,
+                                // Pasamos visualIndex como variable CSS para calcular profundidad y sombra
+                                '--visual-index': visualIndex
+                            } as React.CSSProperties}
+                        >
+                            <div className="card-inner">
+                                <div className="card-front">
+                                    <img src={item.coverImage} alt={item.title} />
+                                </div>
 
+                            </div>
                         </div>
-                    </div>
+                    </AlbumDrawer>
                 );
             })}
         </div>

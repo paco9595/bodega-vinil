@@ -45,7 +45,6 @@ export default function BarcodeScanner({ onBarcodeDetected }: BarcodeScannerProp
                             const barcodes = await barcodeDetector.detect(video)
                             if (barcodes.length > 0) {
                                 const barcode = barcodes[0].rawValue
-                                console.log('Barcode detected:', barcode)
                                 onBarcodeDetected(barcode)
                                 stopScanning()
                                 toast.success('Barcode detected!', {

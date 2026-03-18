@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
         return new Response(JSON.stringify({ error: 'Missing id', message: 'Missing id' }), { status: 400 })
     }
     const releaseMaster = await getFetchDiscogs(`https://api.discogs.com/masters/${id}`)
-    console.log({ releaseMaster })
     const supabase = await createClient()
     const { data, error } = await supabase.from('vinyls').insert([
         {

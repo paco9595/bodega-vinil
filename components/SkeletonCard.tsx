@@ -1,6 +1,6 @@
 export default function SkeletonCard() {
     return (
-        <div className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 transition-all duration-300 animate-pulse">
+        <div className="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 transition-all duration-900 animate-pulse">
             <div className="aspect-square relative bg-white/10"></div>
             <div className="p-4 space-y-3">
                 <div className="space-y-2">

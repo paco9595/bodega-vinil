@@ -17,7 +17,7 @@ export function SearchResultItem({ album, initialInCollection = false, initialIn
 
     return (
         <div className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
-            <AlbumDrawer album={album as any}>
+            <AlbumDrawer album={album as any} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist}>
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <img
                         src={album?.cover_image || ''}

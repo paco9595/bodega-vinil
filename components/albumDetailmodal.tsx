@@ -8,13 +8,18 @@ import { useState, useEffect } from "react";
 import { DrawerClose, DrawerDescription, DrawerTitle } from "./ui/drawer";
 import { Vinyl } from "@/lib/types/tables";
 
+import useWishlist from "@/hooks/useWistList";
+
 type AlbumDetailModalProps = {
     album: DiscogsRelease & Partial<Vinyl>
+    initialInCollection?: boolean
+    initialInWishlist?: boolean
 }
-export default function AlbumDetailModal({ album }: AlbumDetailModalProps) {
+export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist }: AlbumDetailModalProps) {
     const [tracklist, setTracklist] = useState<any[]>([]);
-    const [inCollection, setInCollection] = useState(false);
-    const [inWishlist, setInWishlist] = useState(false);
+    const [inCollection, setInCollection] = useState(initialInCollection || album.owned === true || false);
+    const [inWishlist, setInWishlist] = useState(initialInWishlist || album.owned === false || false);
+    const { addToCollectionFromSearch } = useWishlist();
 
     useEffect(() => {
         async function fetchTracks() {
@@ -69,7 +74,10 @@ export default function AlbumDetailModal({ album }: AlbumDetailModalProps) {
             <div>
                 <div className="flex gap-3 my-8 px-8">
                     <button
-                        onClick={() => setInCollection(!inCollection)}
+                        onClick={() => {
+                            setInCollection(!inCollection);
+                            addToCollectionFromSearch(album.id, true);
+                        }}
                         className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-medium transition-all shadow-lg ${inCollection
                             ? 'bg-amber-600 text-white'
                             : 'bg-amber-500 hover:bg-amber-600 text-white'
@@ -88,7 +96,10 @@ export default function AlbumDetailModal({ album }: AlbumDetailModalProps) {
                         )}
                     </button>
                     <button
-                        onClick={() => setInWishlist(!inWishlist)}
+                        onClick={() => {
+                            setInWishlist(!inWishlist);
+                            addToCollectionFromSearch(album.id, false);
+                        }}
                         className={`p-4 rounded-2xl transition-colors ${inWishlist
                             ? 'bg-red-500 text-white'
                             : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'

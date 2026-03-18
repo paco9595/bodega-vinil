@@ -52,7 +52,6 @@ export function useSearchDiscogs(query: DiscogsSearchRequest) {
         }
     }
     useEffect(() => {
-        console.log({ debouncedQuery, trim: debouncedQuery.trim() })
         if (debouncedQuery.trim()) {
             getResults()
         } else if (debouncedQuery === '') {

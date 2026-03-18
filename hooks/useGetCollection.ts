@@ -45,15 +45,18 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
 
     const getData = async () => {
         try {
+            setIsLoading(true)
             let data;
             if (token) {
                 const res = await fetch(`/api/magicLink?token=${token}`).then(res => res.json())
                 if (res.error === 'Token expirado') {
                     return redirect('/not-found')
                 }
+                if (res.error) throw Error(res.error)
                 data = res.vinyls
             } else {
                 const res = await fetch('/api/get/collection').then(res => res.json())
+                if (res.error) throw Error(res.error)
                 data = res.data
             }
             const sortedCollection = sortArray(data || [], sortBy)

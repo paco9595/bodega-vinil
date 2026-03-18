@@ -18,7 +18,6 @@ export async function GET(req: Request) {
         per_page,
         format: 'vinyl'
     })
-    console.log({ ...params, track })
     if (year) params.append('year', year)
     if (genre) params.append('genre', genre)
     if (!track && q) {
@@ -26,14 +25,11 @@ export async function GET(req: Request) {
         params.set('type', type)
 
         if (type === 'artist') params.delete('format')
-
-        console.log(params)
     } else if (track) {
         params.set('track', track)
     }
 
 
     const data = await getFetchDiscogs(`https://api.discogs.com/database/search?${params.toString()}`)
-    console.log(data)
     return NextResponse.json(data)
 }

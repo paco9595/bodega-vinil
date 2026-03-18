@@ -13,7 +13,6 @@ export function SearchResults({
     collectionIds: Set<number | null>;
     wishlistIds: Set<number | null>;
 }) {
-    console.log({ collectionIds, wishlistIds, results })
     if (!query) {
         return (
             <div className="text-center py-16">

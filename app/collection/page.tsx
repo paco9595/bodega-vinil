@@ -10,6 +10,7 @@ import useCollection from '@/hooks/useGetCollection';
 import { SortOption } from '@/components/sortOption';
 import SkeletonCard from '@/components/SkeletonCard';
 import ShareModal from '@/components/ShareModal';
+import ExportButton from '@/components/ExportButton';
 
 type ViewMode = 'grid' | 'table' | 'crate';
 
@@ -29,7 +30,10 @@ export default function DashboardPage() {
                                 <h2 className="text-2xl font-light mb-2">My Collection</h2>
                                 <p className="text-zinc-400 text-sm">{collection?.length} albums</p>
                             </div>
-                            <ShareModal page="collection" />
+                            <div className="flex items-center gap-2">
+                                {!isShared && <ExportButton collection={collection} />}
+                                <ShareModal page="collection" />
+                            </div>
                         </div>
 
                         {collection?.length === 0 ? (

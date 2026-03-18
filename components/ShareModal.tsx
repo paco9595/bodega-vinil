@@ -2,19 +2,40 @@
 
 import { useState } from 'react'
 import { Share2, X, Copy, Check, Loader2 } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
-export default function ShareModal() {
+type ShareModalProps = {
+    page?: 'wishlist' | 'collection'
+    title?: string
+}
+
+export default function ShareModal({ page = 'wishlist', title }: ShareModalProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [link, setLink] = useState('')
     const [copied, setCopied] = useState(false)
     const [error, setError] = useState('')
+    const searchParams = useSearchParams()
+    const urlToken = searchParams.get('token')
+
+    if (urlToken) return null
+
+    const displayTitle = title || (page === 'wishlist' ? 'Share Wishlist' : 'Share Collection')
+    const displayDescription = page === 'wishlist' 
+        ? 'Generate a temporary link to share your wishlist with others.'
+        : 'Generate a temporary link to share your public collection with others.'
 
     const generateLink = async () => {
         setLoading(true)
         setError('')
         try {
-            const res = await fetch('/api/magicLink', { method: 'POST' })
+            const res = await fetch('/api/magicLink', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ page })
+            })
             const data = await res.json()
 
             if (!res.ok) throw new Error(data.error || 'Failed to generate link')
@@ -52,7 +73,7 @@ export default function ShareModal() {
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
             >
                 <Share2 className="w-4 h-4" />
-                Share Wishlist
+                {displayTitle}
             </button>
         )
     }
@@ -67,10 +88,10 @@ export default function ShareModal() {
                     <X className="w-5 h-5" />
                 </button>
 
-                <h2 className="text-xl font-bold mb-4">Share Wishlist</h2>
+                <h2 className="text-xl font-bold mb-4">{displayTitle}</h2>
 
                 <p className="text-muted-foreground text-sm mb-6">
-                    Generate a temporary link to share your wishlist with others.
+                    {displayDescription}
                 </p>
 
                 {error ? (

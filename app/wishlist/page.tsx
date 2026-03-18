@@ -6,7 +6,7 @@ import useWishlist from "@/hooks/useWistList"
 import { Spinner } from "@/components/ui/spinner"
 
 export default function WishListPage() {
-    const { wishlist, isLoading, addToCollectionFormWishList } = useWishlist()
+    const { wishlist, isLoading, addToCollectionFormWishList, isShared } = useWishlist()
 
     return (
         <div className="container mx-auto px-6 flex-1">
@@ -21,7 +21,7 @@ export default function WishListPage() {
                 {wishlist.length > 0 ? (
                     <div className="space-y-3">
                         {wishlist.map((album) => (
-                            <WishListcart key={album.id} album={album as any} addHandler={addToCollectionFormWishList} />
+                            <WishListcart key={album.id} album={album as any} addHandler={addToCollectionFormWishList} readOnly={isShared} />
                         ))}
                     </div>
                 ) : (

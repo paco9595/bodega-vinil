@@ -14,8 +14,9 @@ type AlbumDetailModalProps = {
     album: DiscogsRelease & Partial<Vinyl>
     initialInCollection?: boolean
     initialInWishlist?: boolean
+    readOnly?: boolean
 }
-export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist }: AlbumDetailModalProps) {
+export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist, readOnly }: AlbumDetailModalProps) {
     const [tracklist, setTracklist] = useState<any[]>([]);
     const [inCollection, setInCollection] = useState(initialInCollection || album.owned === true || false);
     const [inWishlist, setInWishlist] = useState(initialInWishlist || album.owned === false || false);
@@ -67,9 +68,9 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                     </DrawerClose>
                     <div className="absolute -bottom-px  inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
                 </div>
-                <div className="pb-8 absolute -bottom-20  z-10 px-8">
+                <div className={!readOnly ? "pb-8 absolute -bottom-20  z-10 px-8 opacity-50" : "absolute -bottom-20  z-10 px-8"}>
                     {/* Album Info */}
-                    <div className="mb-6">
+                    <div className={!readOnly ? "mb-6" : ""}>
                         <DrawerTitle asChild>
 
                             <h2 className="text-3xl font-light mb-2">{album.title}</h2>
@@ -86,45 +87,49 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                 </div>
             </div>
             <div>
-                <div className="flex gap-3 my-8 px-8">
-                    <button
-                        onClick={() => {
-                            setInCollection(!inCollection);
-                            addToCollectionFromSearch(album.id, true);
-                        }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-medium transition-all shadow-lg ${inCollection
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-amber-500 hover:bg-amber-600 text-white'
-                            }`}
-                    >
-                        {inCollection ? (
-                            <>
-                                <Check className="w-5 h-5" />
-                                <span>In Collection</span>
-                            </>
-                        ) : (
-                            <>
-                                <Plus className="w-5 h-5" />
-                                <span>Add to Collection</span>
-                            </>
-                        )}
-                    </button>
-                    <button
-                        onClick={() => {
-                            setInWishlist(!inWishlist);
-                            addToCollectionFromSearch(album.id, false);
-                        }}
-                        className={`p-4 rounded-2xl transition-colors ${inWishlist
-                            ? 'bg-red-500 text-white'
-                            : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                            }`}
-                    >
-                        <Heart className="w-5 h-5" fill={inWishlist ? 'currentColor' : 'none'} />
-                    </button>
-                    <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
-                        <Share2 className="w-5 h-5" />
-                    </button>
-                </div>
+                {!readOnly ? (
+                    <div className="flex gap-3 my-8 px-8">
+                        <button
+                            onClick={() => {
+                                setInCollection(!inCollection);
+                                addToCollectionFromSearch(album.id, true);
+                            }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-medium transition-all shadow-lg ${inCollection
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                }`}
+                        >
+                            {inCollection ? (
+                                <>
+                                    <Check className="w-5 h-5" />
+                                    <span>In Collection</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-5 h-5" />
+                                    <span>Add to Collection</span>
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setInWishlist(!inWishlist);
+                                addToCollectionFromSearch(album.id, false);
+                            }}
+                            className={`p-4 rounded-2xl transition-colors ${inWishlist
+                                ? 'bg-red-500 text-white'
+                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                                }`}
+                        >
+                            <Heart className="w-5 h-5" fill={inWishlist ? 'currentColor' : 'none'} />
+                        </button>
+                        <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
+                            <Share2 className="w-5 h-5" />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="h-24"></div>
+                )}
             </div>
             {/* Tracklist / Releases Section */}
             <div className="flex-1 overflow-y-auto px-8 pb-8">

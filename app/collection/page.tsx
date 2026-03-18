@@ -8,13 +8,14 @@ import CrateDiggingView from '@/components/CrateDigging';
 import useCollection from '@/hooks/useGetCollection';
 import { SortOption } from '@/components/sortOption';
 import SkeletonCard from '@/components/SkeletonCard';
+import ShareModal from '@/components/ShareModal';
 
 type ViewMode = 'grid' | 'table' | 'crate';
 
 export default function DashboardPage() {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [showSortMenu, setShowSortMenu] = useState(false);
-    const { collection, isLoading, setSortBy, sortBy, error, filterBy, setFilterBy } = useCollection({ sort: 'title' })
+    const { collection, isLoading, setSortBy, sortBy, error, filterBy, setFilterBy, isShared } = useCollection({ sort: 'title' })
 
     return (
         <div className="flex flex-1 bg-background">
@@ -22,9 +23,12 @@ export default function DashboardPage() {
 
                 {!isLoading && !error &&
                     (<div className="flex flex-1 flex-col max-w-7xl m-auto items-start md:items-center justify-between mb-8 w-full">
-                        <div className="mb-6 text-center md:text-left w-full">
-                            <h2 className="text-2xl font-light mb-2">My Collection</h2>
-                            <p className="text-zinc-400 text-sm">{collection?.length} albums</p>
+                        <div className="mb-6 text-center md:text-left w-full flex justify-between items-end">
+                            <div>
+                                <h2 className="text-2xl font-light mb-2">My Collection</h2>
+                                <p className="text-zinc-400 text-sm">{collection?.length} albums</p>
+                            </div>
+                            <ShareModal page="collection" />
                         </div>
 
                         {collection?.length === 0 ? (
@@ -129,6 +133,7 @@ export default function DashboardPage() {
                                                 <AlbumCardDrawer
                                                     key={album.id}
                                                     album={album.release_data as any}
+                                                    readOnly={isShared}
                                                 />
                                             ))}
                                             {collection.length === 0 && filterBy && (
@@ -144,6 +149,7 @@ export default function DashboardPage() {
                                                 <AlbumDrawer
                                                     key={album.id}
                                                     album={album as any}
+                                                    readOnly={isShared}
                                                 >
                                                     <div className="w-full flex items-center gap-4 py-3 rounded-xl hover:bg-zinc-900 transition-colors text-left">
                                                         <img

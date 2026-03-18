@@ -57,7 +57,7 @@ export function useSearchDiscogs(query: DiscogsSearchRequest) {
         } else if (debouncedQuery === '') {
             setResults([])
         }
-    }, [debouncedQuery])
+    }, [debouncedQuery, query.searchType, query.genre, query.sortBy, query.per_page, currentPage])
 
     return { results, isLoading, error, pagination, currentPage, setCurrentPage };
 }

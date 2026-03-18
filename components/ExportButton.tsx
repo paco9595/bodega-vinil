@@ -14,7 +14,7 @@ export default function ExportButton({ collection, className = '' }: ExportButto
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside: (event: MouseEvent) => void = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
@@ -54,7 +54,7 @@ export default function ExportButton({ collection, className = '' }: ExportButto
                 return `"${title}","${artist}","${year}","${format}","${discogsId}","${createdAt}"`;
             })
         ].join('\n');
-        
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const linkElement = document.createElement('a');

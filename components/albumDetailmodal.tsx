@@ -1,7 +1,7 @@
 'use client';
 
 import { getTracks } from "@/lib/tracklist";
-import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
+import { Artist, DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { Check, Heart, Plus, Share2, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -56,7 +56,7 @@ export default function AlbumDetailModal({ album }: AlbumDetailModalProps) {
                         </DrawerTitle>
                         <DrawerDescription asChild>
                             <div>
-                                <p className="text-xl text-zinc-300 mb-2">{album.artists?.map((artist) => artist.name).join(', ')}</p>
+                                <p className="text-xl text-zinc-300 mb-2">{album.artists?.map((artist: Artist) => artist.name).join(', ')}</p>
                                 <p className="text-sm text-zinc-400">
                                     {album.year} • {album.genres?.join(', ')}
                                 </p>

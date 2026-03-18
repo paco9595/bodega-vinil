@@ -7,7 +7,7 @@ import CrateDiggingView from '@/components/CrateDigging';
 
 import useCollection from '@/hooks/useGetCollection';
 import { SortOption } from '@/components/sortOption';
-import { Spinner } from '@/components/ui/spinner';
+import SkeletonCard from '@/components/SkeletonCard';
 
 type ViewMode = 'grid' | 'table' | 'crate';
 
@@ -186,8 +186,12 @@ export default function DashboardPage() {
                     )}
                 {
                     isLoading && (
-                        <div className='w-full h-full flex-1 flex justify-center items-center'>
-                            <Spinner />
+                        <div className="flex flex-1 flex-col max-w-7xl m-auto items-start md:items-center justify-between mb-8 w-full mt-24">
+                            <div className="grid grid-cols-2 gap-4 w-full">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <SkeletonCard key={i} />
+                                ))}
+                            </div>
                         </div>
                     )
                 }

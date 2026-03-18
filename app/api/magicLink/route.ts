@@ -8,6 +8,8 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
+    const { page = 'wishlist' } = await req.json();
+
     const token = randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -16,15 +18,16 @@ export async function POST(req: NextRequest) {
             .from("shared_links")
             .select("*")
             .eq("user_id", user.id)
+            .eq("page", page)
             .single()
 
         if (!link) {
-            const { data: tokenData, error } = await supabase.from('shared_links').insert({ token, page: 'wishlist', expires, user_id: user.id });
+            const { data: tokenData, error } = await supabase.from('shared_links').insert({ token, page, expires, user_id: user.id });
 
-            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
+            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/${page}?token=${token}` });
         } else {
             await supabase.from('shared_links').update({ expires }).eq('id', link.id);
-            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/wishlist?token=${token}` });
+            return NextResponse.json({ token, link: `${process.env.NEXT_PUBLIC_BASE_URL}/${page}?token=${link.token}` });
         }
 
     } catch (error) {
@@ -51,11 +54,14 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Token expirado" }, { status: 401 });
         }
 
+        // Si page es wishlist owned = false, si es collection owned = true
+        const isOwned = link.page === 'collection';
+
         const { data: vinyls, error: vinylError } = await supabase
             .from("vinyls")
             .select("*")
             .eq("user_id", link.user_id)
-            .eq("owned", false)
+            .eq("owned", isOwned)
             .order("created_at", { ascending: false });
 
         if (vinylError) {

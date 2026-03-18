@@ -75,7 +75,7 @@ export default function useWishlist() {
         await addToCollectionFromSearch(albumId, owned)
     }
 
-    return { wishlist, isLoading, genres, addToCollectionFormWishList, addToCollectionFromSearch: addToCollectionFromSearchHook }
+    return { wishlist, isLoading, genres, addToCollectionFormWishList, addToCollectionFromSearch: addToCollectionFromSearchHook, isShared: !!token }
 }
 
 export const addToCollectionFromSearch = async (albumId: number, owned: boolean) => {

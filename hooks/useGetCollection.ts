@@ -1,5 +1,6 @@
+import { useSearchParams, redirect } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { useEffect, useMemo, useState } from 'react';
 import { Vinyl } from '@/lib/types/tables';
 import { NormalizeString, sortArray } from '@/utils/utilits';
 
@@ -11,18 +12,50 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [sortBy, setSortBy] = useState<SortBy>(sort);
     const [filterBy, setFilterBy] = useState<string>('')
+    const searchParams = useSearchParams()
+    const token = searchParams.get('token')
+    const supabase = useMemo(() => createClient(), [])
+
+    const verifyAuth = useCallback(async () => {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return redirect('/')
+        }
+    }, [supabase])
 
     useEffect(() => {
-        getData()
-    }, [])
+        const init = async () => {
+            try {
+                if (!token) {
+                    await verifyAuth()
+                }
+                await getData()
+            } catch (error) {
+                console.log(error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        init()
+    }, [token, verifyAuth])
 
 
     const getData = async () => {
         try {
-            setIsLoading(true)
-            const { data, error } = await fetch('/api/get/collection').then(res => res.json())
-            console.log({ data, error })
-            if (error) throw Error(error)
+            let data;
+            if (token) {
+                const res = await fetch(`/api/magicLink?token=${token}`).then(res => res.json())
+                if (res.error === 'Token expirado') {
+                    return redirect('/not-found')
+                }
+                data = res.vinyls
+            } else {
+                const res = await fetch('/api/get/collection').then(res => res.json())
+                data = res.data
+            }
             const sortedCollection = sortArray(data || [], sortBy)
             setCollection(sortedCollection)
 
@@ -30,9 +63,6 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
             console.error(e)
             setCollection([])
             setError(null)
-        }
-        finally {
-            setIsLoading(false)
         }
     }
     const filteredCollection = useMemo(() => {
@@ -50,6 +80,6 @@ export default function useCollection({ sort = 'title' }: { sort: SortBy }) {
         return sortArray(filteredCollection, sortBy)
     }, [collection, sortBy, filteredCollection])
 
-    return { collection: sortedCollection, isLoading, error, setSortBy, sortBy, filterBy, setFilterBy }
+    return { collection: sortedCollection, isLoading, error, setSortBy, sortBy, filterBy, setFilterBy, isShared: !!token }
 
 }

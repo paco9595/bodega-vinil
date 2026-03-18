@@ -14,8 +14,9 @@ type AlbumDetailModalProps = {
     album: DiscogsRelease & Partial<Vinyl>
     initialInCollection?: boolean
     initialInWishlist?: boolean
+    readOnly?: boolean
 }
-export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist }: AlbumDetailModalProps) {
+export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist, readOnly }: AlbumDetailModalProps) {
     const [tracklist, setTracklist] = useState<any[]>([]);
     const [inCollection, setInCollection] = useState(initialInCollection || album.owned === true || false);
     const [inWishlist, setInWishlist] = useState(initialInWishlist || album.owned === false || false);
@@ -86,7 +87,7 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                 </div>
             </div>
             <div>
-                <div className="flex gap-3 my-8 px-8">
+                { !readOnly && (<div className="flex gap-3 my-8 px-8">
                     <button
                         onClick={() => {
                             setInCollection(!inCollection);
@@ -124,7 +125,7 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                     <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
                         <Share2 className="w-5 h-5" />
                     </button>
-                </div>
+                </div>) }
             </div>
             {/* Tracklist / Releases Section */}
             <div className="flex-1 overflow-y-auto px-8 pb-8">

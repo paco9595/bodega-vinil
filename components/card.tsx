@@ -38,22 +38,22 @@ export function Card({ album, showInCollection = false }: cardProps) {
     );
 }
 
-export function AlbumDrawer({ children, album, initialInCollection, initialInWishlist }: { children: React.ReactNode, album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean }) {
+export function AlbumDrawer({ children, album, initialInCollection, initialInWishlist, readOnly }: { children: React.ReactNode, album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean, readOnly?: boolean }) {
     return (
         <Drawer direction='bottom'>
             <DrawerTrigger asChild >
                 {children}
             </DrawerTrigger>
             <DrawerContent dragable={true} className='rounded-t-4xl'>
-                <AlbumDetailModal album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} />
+                <AlbumDetailModal album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} readOnly={readOnly} />
             </DrawerContent>
         </Drawer>
     )
 }
 
-export function AlbumCardDrawer({ album, initialInCollection, initialInWishlist }: { album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean }) {
+export function AlbumCardDrawer({ album, initialInCollection, initialInWishlist, readOnly }: { album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean, readOnly?: boolean }) {
     return (
-        <AlbumDrawer album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist}>
+        <AlbumDrawer album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} readOnly={readOnly}>
             <div>
                 <Card album={album} />
             </div>

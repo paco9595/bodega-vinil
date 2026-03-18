@@ -43,7 +43,8 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/not-found') &&
         !request.nextUrl.pathname.startsWith('/api') &&
         request.nextUrl.pathname !== '/' &&
-        !(request.nextUrl.pathname.startsWith('/wishlist') && request.nextUrl.searchParams.has('token'))
+        !(request.nextUrl.pathname.startsWith('/wishlist') && request.nextUrl.searchParams.has('token')) &&
+        !(request.nextUrl.pathname.startsWith('/collection') && request.nextUrl.searchParams.has('token'))
     ) {
 
         // no user, potentially respond by redirecting the user to the login page

@@ -1,6 +1,6 @@
 'use client';
 
-import { getTracks } from "@/lib/tracklist";
+import { getTracks, getArtistReleases } from "@/lib/tracklist";
 import { Artist, DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { Check, Heart, Plus, Share2, X } from "lucide-react";
 import Image from "next/image";
@@ -8,37 +8,53 @@ import { useState, useEffect } from "react";
 import { DrawerClose, DrawerDescription, DrawerTitle } from "./ui/drawer";
 import { Vinyl } from "@/lib/types/tables";
 
-import useWishlist from "@/hooks/useWistList";
+import { addToCollectionFromSearch } from "@/hooks/useWistList";
 
 type AlbumDetailModalProps = {
     album: DiscogsRelease & Partial<Vinyl>
     initialInCollection?: boolean
     initialInWishlist?: boolean
+    readOnly?: boolean
 }
-export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist }: AlbumDetailModalProps) {
+export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist, readOnly }: AlbumDetailModalProps) {
     const [tracklist, setTracklist] = useState<any[]>([]);
     const [inCollection, setInCollection] = useState(initialInCollection || album.owned === true || false);
     const [inWishlist, setInWishlist] = useState(initialInWishlist || album.owned === false || false);
-    const { addToCollectionFromSearch } = useWishlist();
+
+    const isArtist = (album as any).type === 'artist';
+    const [artistReleases, setArtistReleases] = useState<any[]>([]);
 
     useEffect(() => {
-        async function fetchTracks() {
-            const id = album?.master_id || album?.discogs_id
-            if (id) {
+        if (isArtist) {
+            async function fetchReleases() {
                 try {
-                    const data = await getTracks(id.toString());
-                    setTracklist(data.tracklist || []);
+                    const data = await getArtistReleases(String(album.id));
+                    setArtistReleases(data.releases || []);
                 } catch (error) {
-                    console.error("Failed to fetch tracks", error);
+                    console.error("Failed to fetch artist releases", error);
                 }
             }
-        }
-        if (album.tracklist && album.tracklist.length > 0) {
-            setTracklist(album.tracklist);
+            fetchReleases();
         } else {
-            fetchTracks();
+            async function fetchTracks() {
+                const id = album?.master_id || album?.discogs_id
+                if (id) {
+                    try {
+                        const data = await getTracks(id.toString());
+                        console.log({ tracklist: data.tracklist });
+                        setTracklist(data.tracklist || []);
+                    } catch (error) {
+                        console.error("Failed to fetch tracks", error);
+                    }
+                }
+            }
+            if (album.tracklist && album.tracklist.length > 0) {
+                setTracklist(album.tracklist);
+            } else {
+                fetchTracks();
+            }
         }
-    }, [album?.master_id, album?.discogs_id]);
+    }, [isArtist, album?.id, album?.tracklist, album?.master_id, album?.discogs_id]);
 
     const imageUrl = Array.isArray(album.images) ? album.images[0].uri : (album.cover_image ?? album.thumb);
     return (
@@ -52,9 +68,9 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                     </DrawerClose>
                     <div className="absolute -bottom-px  inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
                 </div>
-                <div className="pb-8 absolute -bottom-20  z-10 px-8">
+                <div className={!readOnly ? "pb-8 absolute -bottom-20  z-10 px-8 opacity-50" : "absolute -bottom-20  z-10 px-8"}>
                     {/* Album Info */}
-                    <div className="mb-6">
+                    <div className={!readOnly ? "mb-6" : ""}>
                         <DrawerTitle asChild>
 
                             <h2 className="text-3xl font-light mb-2">{album.title}</h2>
@@ -71,61 +87,80 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                 </div>
             </div>
             <div>
-                <div className="flex gap-3 my-8 px-8">
-                    <button
-                        onClick={() => {
-                            setInCollection(!inCollection);
-                            addToCollectionFromSearch(album.id, true);
-                        }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-medium transition-all shadow-lg ${inCollection
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-amber-500 hover:bg-amber-600 text-white'
-                            }`}
-                    >
-                        {inCollection ? (
-                            <>
-                                <Check className="w-5 h-5" />
-                                <span>In Collection</span>
-                            </>
-                        ) : (
-                            <>
-                                <Plus className="w-5 h-5" />
-                                <span>Add to Collection</span>
-                            </>
-                        )}
-                    </button>
-                    <button
-                        onClick={() => {
-                            setInWishlist(!inWishlist);
-                            addToCollectionFromSearch(album.id, false);
-                        }}
-                        className={`p-4 rounded-2xl transition-colors ${inWishlist
-                            ? 'bg-red-500 text-white'
-                            : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                            }`}
-                    >
-                        <Heart className="w-5 h-5" fill={inWishlist ? 'currentColor' : 'none'} />
-                    </button>
-                    <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
-                        <Share2 className="w-5 h-5" />
-                    </button>
-                </div>
+                {!readOnly ? (
+                    <div className="flex gap-3 my-8 px-8">
+                        <button
+                            onClick={() => {
+                                setInCollection(!inCollection);
+                                addToCollectionFromSearch(album.id, true);
+                            }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-medium transition-all shadow-lg ${inCollection
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                }`}
+                        >
+                            {inCollection ? (
+                                <>
+                                    <Check className="w-5 h-5" />
+                                    <span>In Collection</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-5 h-5" />
+                                    <span>Add to Collection</span>
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setInWishlist(!inWishlist);
+                                addToCollectionFromSearch(album.id, false);
+                            }}
+                            className={`p-4 rounded-2xl transition-colors ${inWishlist
+                                ? 'bg-red-500 text-white'
+                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                                }`}
+                        >
+                            <Heart className="w-5 h-5" fill={inWishlist ? 'currentColor' : 'none'} />
+                        </button>
+                        <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
+                            <Share2 className="w-5 h-5" />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="h-24"></div>
+                )}
             </div>
-            {/* Tracklist Section */}
+            {/* Tracklist / Releases Section */}
             <div className="flex-1 overflow-y-auto px-8 pb-8">
-                <h3 className="text-xl font-semibold mb-4 text-white/50">Tracklist</h3>
-                <div className="space-y-4">
-                    {tracklist.map((track: any, index: number) => (
-                        <div key={index} className="flex justify-between items-center text-zinc-300">
-                            <div className="flex gap-4 items-center">
-                                <span className="text-zinc-500 w-6 text-sm">{track.position}</span>
-                                <span className="font-medium">{track.title}</span>
+                <h3 className="text-xl font-semibold mb-4 text-white/50">{isArtist ? 'Releases' : 'Tracklist'}</h3>
+                {isArtist ? (
+                    <div className="space-y-4">
+                        {artistReleases.map((release: any, index: number) => (
+                            <div key={index} className="flex gap-4 items-center text-zinc-300">
+                                <Image src={release.thumb || '/placeholder.png'} width={48} height={48} className="rounded object-cover w-12 h-12" alt={release.title} />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-white line-clamp-1">{release.title}</p>
+                                    <p className="text-sm text-zinc-500">{release.year}</p>
+                                </div>
                             </div>
-                            <span className="text-sm text-zinc-500">{track.duration}</span>
-                        </div>
-                    ))}
-                    {tracklist.length === 0 && <p className="text-zinc-500 text-sm">No tracks available.</p>}
-                </div>
+                        ))}
+                        {artistReleases.length === 0 && <p className="text-zinc-500 text-sm">No releases available.</p>}
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {tracklist.map((track: any, index: number) => (
+                            <div key={index} className="flex justify-between items-center text-zinc-300">
+                                <div className="flex gap-4 items-center">
+                                    <span className="text-zinc-500 w-6 text-sm">{track.position}</span>
+                                    <span className="font-medium">{track.title}</span>
+                                </div>
+                                <span className="text-sm text-zinc-500">{track.duration}</span>
+                            </div>
+                        ))}
+                        {tracklist.length === 0 && <p className="text-zinc-500 text-sm">No tracks available.</p>}
+                    </div>
+                )}
             </div>
         </div>
     )

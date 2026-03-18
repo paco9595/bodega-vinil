@@ -69,18 +69,24 @@ export default function useWishlist() {
             toast.success('Album added to collection')
             setWishList(wishlist.filter((album) => album.id !== albumId))
         })
-
-    }
-    const addToCollectionFromSearch = async (albumId: number, owned: boolean) => {
-        await fetch('/api/insert/item', {
-            method: 'POST',
-            body: JSON.stringify({
-                masterId: albumId,
-                owned,
-            })
-        })
     }
 
+    const addToCollectionFromSearchHook = async (albumId: number, owned: boolean) => {
+        await addToCollectionFromSearch(albumId, owned)
+    }
 
-    return { wishlist, isLoading, genres, addToCollectionFormWishList, addToCollectionFromSearch }
+    return { wishlist, isLoading, genres, addToCollectionFormWishList, addToCollectionFromSearch: addToCollectionFromSearchHook, isShared: !!token }
 }
+
+export const addToCollectionFromSearch = async (albumId: number, owned: boolean) => {
+    await fetch('/api/insert/item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            masterId: albumId,
+            owned,
+        })
+    })
+}

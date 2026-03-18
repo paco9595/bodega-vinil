@@ -31,8 +31,7 @@ export async function GET(req: Request) {
     } else if (track) {
         params.set('track', track)
     }
-    // TODO: filtros avanzados agregar nombre del artista a la buquesa del album
-    // if (artist) params.set('artist', artist)
+
 
     const data = await getFetchDiscogs(`https://api.discogs.com/database/search?${params.toString()}`)
     console.log(data)

@@ -2,8 +2,7 @@ import { DiscogsRelease } from "@/lib/types/DiscogsRelease";
 import { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { AlbumDrawer } from "./card";
-import useWishlist from "@/hooks/useWistList";
-
+import { addToCollectionFromSearch } from "@/hooks/useWistList";
 interface SearchResultItemProps {
     album: DiscogsRelease;
     initialInCollection?: boolean;
@@ -13,7 +12,6 @@ interface SearchResultItemProps {
 export function SearchResultItem({ album, initialInCollection = false, initialInWishlist = false }: SearchResultItemProps) {
     const [inCollection, setInCollection] = useState(initialInCollection);
     const [inWishlist, setInWishlist] = useState(initialInWishlist);
-    const { addToCollectionFromSearch } = useWishlist()
 
     return (
         <div className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
@@ -22,7 +20,7 @@ export function SearchResultItem({ album, initialInCollection = false, initialIn
                     <img
                         src={album?.cover_image || ''}
                         alt={album.title}
-                        className="w-16 h-16 rounded-lg object-cover shadow-lg flex-shrink-0"
+                        className="w-16 h-16 rounded-lg object-cover shadow-lg shrink-0"
                     />
                     <div className="flex-1 min-w-0 text-left">
                         <p className="font-medium text-sm line-clamp-1">{album.title}</p>
@@ -33,7 +31,7 @@ export function SearchResultItem({ album, initialInCollection = false, initialIn
                     </div>
                 </div>
             </AlbumDrawer>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex gap-2 shrink-0">
                 <button
                     onClick={(e) => {
                         e.stopPropagation();

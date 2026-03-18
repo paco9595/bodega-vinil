@@ -38,22 +38,22 @@ export function Card({ album, showInCollection = false }: cardProps) {
     );
 }
 
-export function AlbumDrawer({ children, album }: { children: React.ReactNode, album: DiscogsRelease & Partial<Vinyl> }) {
+export function AlbumDrawer({ children, album, initialInCollection, initialInWishlist }: { children: React.ReactNode, album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean }) {
     return (
         <Drawer direction='bottom'>
             <DrawerTrigger asChild >
                 {children}
             </DrawerTrigger>
             <DrawerContent dragable={true} className='rounded-t-4xl'>
-                <AlbumDetailModal album={album} />
+                <AlbumDetailModal album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} />
             </DrawerContent>
         </Drawer>
     )
 }
 
-export function AlbumCardDrawer({ album }: { album: DiscogsRelease & Partial<Vinyl> }) {
+export function AlbumCardDrawer({ album, initialInCollection, initialInWishlist }: { album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean }) {
     return (
-        <AlbumDrawer album={album}>
+        <AlbumDrawer album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist}>
             <div>
                 <Card album={album} />
             </div>

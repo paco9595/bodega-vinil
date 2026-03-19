@@ -35,7 +35,7 @@ Este documento lista las mejoras sugeridas y nuevas funcionalidades para llevar 
 
 - [ ] **Integración con Spotify**: Añadir reproductor o enlace para escuchar el álbum en Spotify directamente desde la vista de detalle.
 - [ ] **Perfil Público**: Opción para hacer pública la colección y compartir un enlace único con amigos.
-- [ ] **Exportación de Datos**: Permitir exportar la colección a CSV o JSON.
+- [x] **Exportación de Datos**: Permitir exportar la colección a CSV o JSON.
 
 ### 🔍 Descubrimiento
 

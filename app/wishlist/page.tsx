@@ -5,6 +5,8 @@ import { WishListcart } from "@/components/wishListCart"
 import useWishlist from "@/hooks/useWistList"
 import { Spinner } from "@/components/ui/spinner"
 
+import { motion, AnimatePresence } from "framer-motion"
+
 export default function WishListPage() {
     const { wishlist, isLoading, addToCollectionFormWishList, isShared } = useWishlist()
 
@@ -19,11 +21,13 @@ export default function WishListPage() {
                     <ShareModal />
                 </div>
                 {wishlist.length > 0 ? (
-                    <div className="space-y-3">
-                        {wishlist.map((album) => (
-                            <WishListcart key={album.id} album={album as any} addHandler={addToCollectionFormWishList} readOnly={isShared} />
-                        ))}
-                    </div>
+                    <motion.div layout className="space-y-3">
+                        <AnimatePresence>
+                            {wishlist.map((album) => (
+                                <WishListcart key={album.id} album={album as any} addHandler={addToCollectionFormWishList} readOnly={isShared} />
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
                 ) : (
                     <div className="text-center py-16">
                         <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4">

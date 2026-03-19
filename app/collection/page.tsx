@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Grid3x3, List, Disc, Disc3 } from 'lucide-react';
 import { AlbumCardDrawer, AlbumDrawer } from '@/components/card';
 import EmptyState from '@/components/EmptyState';
@@ -9,6 +10,7 @@ import useCollection from '@/hooks/useGetCollection';
 import { SortOption } from '@/components/sortOption';
 import SkeletonCard from '@/components/SkeletonCard';
 import ShareModal from '@/components/ShareModal';
+import ExportButton from '@/components/ExportButton';
 
 type ViewMode = 'grid' | 'table' | 'crate';
 
@@ -28,7 +30,10 @@ export default function DashboardPage() {
                                 <h2 className="text-2xl font-light mb-2">My Collection</h2>
                                 <p className="text-zinc-400 text-sm">{collection?.length} albums</p>
                             </div>
-                            <ShareModal page="collection" />
+                            <div className="flex items-center gap-2">
+                                {!isShared && <ExportButton collection={collection} />}
+                                <ShareModal page="collection" />
+                            </div>
                         </div>
 
                         {collection?.length === 0 ? (
@@ -128,53 +133,65 @@ export default function DashboardPage() {
 
                                     {/* Grid View */}
                                     {viewMode === 'grid' && (
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {collection.map((album) => (
-                                                <AlbumCardDrawer
-                                                    key={album.id}
-                                                    album={album.release_data as any}
-                                                    readOnly={isShared}
-                                                    initialInCollection={true}
-                                                />
-                                            ))}
+                                        <motion.div layout className="grid grid-cols-2 gap-4">
+                                            <AnimatePresence>
+                                                {collection.map((album) => (
+                                                    <AlbumCardDrawer
+                                                        key={album.id}
+                                                        album={album.release_data as any}
+                                                        readOnly={isShared}
+                                                        initialInCollection={true}
+                                                    />
+                                                ))}
+                                            </AnimatePresence>
                                             {collection.length === 0 && filterBy && (
                                                 <div className="col-span-2 text-center py-12 text-zinc-500">
                                                     No albums found matching "{filterBy}"
                                                 </div>
                                             )}
-                                        </div>
+                                        </motion.div>
                                     )}
                                     {viewMode === 'table' && (
-                                        <div className="space-y-2 w-full">
-                                            {collection.map((album) => (
-                                                <AlbumDrawer
-                                                    key={album.id}
-                                                    album={album as any}
-                                                    readOnly={isShared}
-                                                    initialInCollection={true}
-                                                >
-                                                    <div className="w-full flex items-center gap-4 py-3 rounded-xl hover:bg-zinc-900 transition-colors text-left">
-                                                        <img
-                                                            src={album.cover_image || ''}
-                                                            alt={album.title}
-                                                            className="w-12 h-12 rounded-lg object-cover shadow-lg"
-                                                        />
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-medium text-sm line-clamp-1">{album.title}</p>
-                                                            <p className="text-xs text-zinc-400">{album.artist}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-4 text-sm text-zinc-500">
-                                                            <span>{album.year}</span>
-                                                        </div>
-                                                    </div>
-                                                </AlbumDrawer>
-                                            ))}
+                                        <motion.div layout className="space-y-2 w-full">
+                                            <AnimatePresence>
+                                                {collection.map((album) => (
+                                                    <motion.div
+                                                        key={album.id}
+                                                        layout
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -10 }}
+                                                        transition={{ duration: 0.2 }}
+                                                    >
+                                                        <AlbumDrawer
+                                                            album={album as any}
+                                                            readOnly={isShared}
+                                                            initialInCollection={true}
+                                                        >
+                                                            <div className="w-full flex items-center gap-4 py-3 rounded-xl hover:bg-zinc-900 transition-colors text-left">
+                                                                <img
+                                                                    src={album.cover_image || ''}
+                                                                    alt={album.title}
+                                                                    className="w-12 h-12 rounded-lg object-cover shadow-lg"
+                                                                />
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-medium text-sm line-clamp-1">{album.title}</p>
+                                                                    <p className="text-xs text-zinc-400">{album.artist}</p>
+                                                                </div>
+                                                                <div className="flex items-center gap-4 text-sm text-zinc-500">
+                                                                    <span>{album.year}</span>
+                                                                </div>
+                                                            </div>
+                                                        </AlbumDrawer>
+                                                    </motion.div>
+                                                ))}
+                                            </AnimatePresence>
                                             {collection.length === 0 && filterBy && (
                                                 <div className="text-center py-12 text-zinc-500">
                                                     No albums found matching "{filterBy}"
                                                 </div>
                                             )}
-                                        </div>
+                                        </motion.div>
                                     )}
                                     {viewMode === 'crate' && (
                                         <CrateDiggingView

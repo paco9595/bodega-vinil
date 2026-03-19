@@ -1,5 +1,6 @@
 'use client'
 import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { DiscogsRelease } from '@/lib/types/DiscogsRelease';
 import AlbumDetailModal from './albumDetailmodal';
@@ -53,11 +54,19 @@ export function AlbumDrawer({ children, album, initialInCollection, initialInWis
 
 export function AlbumCardDrawer({ album, initialInCollection, initialInWishlist, readOnly }: { album: DiscogsRelease & Partial<Vinyl>, initialInCollection?: boolean, initialInWishlist?: boolean, readOnly?: boolean }) {
     return (
-        <AlbumDrawer album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} readOnly={readOnly}>
-            <div>
-                <Card album={album} />
-            </div>
-        </AlbumDrawer>
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+        >
+            <AlbumDrawer album={album} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist} readOnly={readOnly}>
+                <div>
+                    <Card album={album} />
+                </div>
+            </AlbumDrawer>
+        </motion.div>
     )
 }
 

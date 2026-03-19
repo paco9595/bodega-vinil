@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { AlbumDrawer } from "./card";
 import { addToCollectionFromSearch } from "@/hooks/useWistList";
+import { motion } from "framer-motion";
+
 interface SearchResultItemProps {
     album: DiscogsRelease;
     initialInCollection?: boolean;
@@ -14,7 +16,14 @@ export function SearchResultItem({ album, initialInCollection = false, initialIn
     const [inWishlist, setInWishlist] = useState(initialInWishlist);
 
     return (
-        <div className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+        >
             <AlbumDrawer album={album as any} initialInCollection={initialInCollection} initialInWishlist={initialInWishlist}>
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <img
@@ -59,6 +68,6 @@ export function SearchResultItem({ album, initialInCollection = false, initialIn
                     <Heart className="w-4 h-4" fill={inWishlist ? 'currentColor' : 'none'} />
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 }

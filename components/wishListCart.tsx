@@ -2,6 +2,8 @@ import { ArrowRight } from "lucide-react";
 import { DiscogsRelease } from "@/lib/validations/discogs";
 import { Vinyl } from "@/lib/types/tables";
 import { AlbumDrawer } from "./card";
+import { motion } from "framer-motion";
+
 export function WishListcart({ album, addHandler, readOnly }: { album: DiscogsRelease & Partial<Vinyl>, addHandler: (albumId: string) => void, readOnly?: boolean }) {
     const imageUrl = Array.isArray(album.images) ? album.images[0].uri : (album.cover_image ?? album.thumb);
     return (
@@ -12,7 +14,14 @@ export function WishListcart({ album, addHandler, readOnly }: { album: DiscogsRe
             initialInCollection={false}
             initialInWishlist={true}
         >
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-900 transition-colors mb-8">
+            <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-900 transition-colors mb-8"
+            >
                 <button className="flex items-center gap-4 flex-1 min-w-0">
                     <img
                         src={imageUrl}
@@ -36,7 +45,7 @@ export function WishListcart({ album, addHandler, readOnly }: { album: DiscogsRe
                         <ArrowRight className="w-4 h-4" />
                     </button>
                 )}
-            </div>
+            </motion.div>
         </AlbumDrawer>
     )
 }

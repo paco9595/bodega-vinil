@@ -18,11 +18,19 @@ type AlbumDetailModalProps = {
 }
 export default function AlbumDetailModal({ album, initialInCollection, initialInWishlist, readOnly }: AlbumDetailModalProps) {
     const [tracklist, setTracklist] = useState<any[]>([]);
-    const [inCollection, setInCollection] = useState(initialInCollection || album.owned === true || false);
-    const [inWishlist, setInWishlist] = useState(initialInWishlist || album.owned === false || false);
+    const [inCollection, setInCollection] = useState(initialInCollection ?? album.owned === true);
+    const [inWishlist, setInWishlist] = useState(initialInWishlist ?? false);
 
     const isArtist = (album as any).type === 'artist';
     const [artistReleases, setArtistReleases] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (initialInCollection !== undefined) setInCollection(initialInCollection);
+    }, [initialInCollection]);
+
+    useEffect(() => {
+        if (initialInWishlist !== undefined) setInWishlist(initialInWishlist);
+    }, [initialInWishlist]);
 
     useEffect(() => {
         if (isArtist) {

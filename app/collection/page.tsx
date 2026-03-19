@@ -134,6 +134,7 @@ export default function DashboardPage() {
                                                     key={album.id}
                                                     album={album.release_data as any}
                                                     readOnly={isShared}
+                                                    initialInCollection={true}
                                                 />
                                             ))}
                                             {collection.length === 0 && filterBy && (
@@ -150,6 +151,7 @@ export default function DashboardPage() {
                                                     key={album.id}
                                                     album={album as any}
                                                     readOnly={isShared}
+                                                    initialInCollection={true}
                                                 >
                                                     <div className="w-full flex items-center gap-4 py-3 rounded-xl hover:bg-zinc-900 transition-colors text-left">
                                                         <img

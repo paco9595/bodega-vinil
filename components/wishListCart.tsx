@@ -1,42 +1,51 @@
 import { ArrowRight } from "lucide-react";
 import { DiscogsRelease } from "@/lib/validations/discogs";
 import { Vinyl } from "@/lib/types/tables";
+import { AlbumDrawer } from "./card";
 import { motion } from "framer-motion";
 
 export function WishListcart({ album, addHandler, readOnly }: { album: DiscogsRelease & Partial<Vinyl>, addHandler: (albumId: string) => void, readOnly?: boolean }) {
     const imageUrl = Array.isArray(album.images) ? album.images[0].uri : (album.cover_image ?? album.thumb);
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-900 transition-colors mb-8"
+        <AlbumDrawer
+            key={album.id}
+            album={album as any}
+            readOnly={readOnly}
+            initialInCollection={false}
+            initialInWishlist={true}
         >
-            <button className="flex items-center gap-4 flex-1 min-w-0">
-                <img
-                    src={imageUrl}
-                    alt={album.title}
-                    className="w-20 h-20 rounded-xl object-cover shadow-lg"
-                />
-                <div className="flex-1 min-w-0 text-left">
-                    <p className="font-medium line-clamp-1">{album.title}</p>
-                    <p className="text-sm text-zinc-400 mt-0.5">{album.artist}</p>
-                    <p className="text-xs text-zinc-500 mt-1">
-                        {album.year} •
-                    </p>
-                </div>
-            </button>
-            {!readOnly && (
-                <button
-                    onClick={() => addHandler(album.id)}
-                    className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition-colors"
-                >
-                    <span>Add</span>
-                    <ArrowRight className="w-4 h-4" />
+            <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-900 transition-colors mb-8"
+            >
+                <button className="flex items-center gap-4 flex-1 min-w-0">
+                    <img
+                        src={imageUrl}
+                        alt={album.title}
+                        className="w-20 h-20 rounded-xl object-cover shadow-lg"
+                    />
+                    <div className="flex-1 min-w-0 text-left">
+                        <p className="font-medium line-clamp-1">{album.title}</p>
+                        <p className="text-sm text-zinc-400 mt-0.5">{album.artist}</p>
+                        <p className="text-xs text-zinc-500 mt-1">
+                            {album.year} •
+                        </p>
+                    </div>
                 </button>
-            )}
-        </motion.div>
+                {!readOnly && (
+                    <button
+                        onClick={() => addHandler(album.id)}
+                        className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition-colors"
+                    >
+                        <span>Add</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                )}
+            </motion.div>
+        </AlbumDrawer>
     )
-}
+}

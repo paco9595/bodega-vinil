@@ -1,16 +1,17 @@
 name: Move Linear QA tickets to Done on PR to main
 
+# Solo después del merge a main (no al abrir ni al pushear al PR)
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [closed]
     branches:
       - main
 
 jobs:
   linear-update:
     runs-on: ubuntu-latest
-    # Solo si el PR viene de develop
-    if: github.head_ref == 'develop' || startsWith(github.head_ref, 'release/')
+    # Solo si el PR se fusionó (no si se cerró sin merge) y viene de develop o release/*
+    if: github.event.pull_request.merged == true && (github.head_ref == 'develop' || startsWith(github.head_ref, 'release/'))
     permissions:
       contents: read
       pull-requests: read
@@ -21,6 +22,8 @@ jobs:
       - name: Find Linear tickets and move QA → Done
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          # Debe coincidir con el nombre del equipo en Linear (Settings → Teams). Por defecto Bearpoint.
+          LINEAR_TEAM_NAME: ${{ vars.LINEAR_TEAM_NAME || 'Bearpoint' }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           # La rama suele ser vin-20-... o similar y no siempre está en título/body
@@ -47,32 +50,31 @@ jobs:
 
           echo "Found tickets: $TICKET_IDS"
 
-          # Obtener el ID del estado "Done" y "QA" via Linear API
-          WORKFLOW_STATES=$(curl -s -X POST \
-            -H "Authorization: $LINEAR_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "query": "{ workflowStates(filter: { team: { name: { eq: \"Viniy collection\" } } }) { nodes { id name type } } }"
-            }' \
-            https://api.linear.app/graphql)
+          # Obtener el ID del estado "Done" y "QA" via Linear API (equipo: LINEAR_TEAM_NAME, default Bearpoint)
+          WORKFLOW_STATES=$(python3 .github/scripts/linear_fetch_workflow_states.py)
 
+          echo "Linear team filter: $LINEAR_TEAM_NAME"
           echo "Workflow states: $WORKFLOW_STATES"
 
-          QA_STATE_ID=$(echo $WORKFLOW_STATES | python3 -c "
+          QA_STATE_ID=$(echo "$WORKFLOW_STATES" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          states = data['data']['workflowStates']['nodes']
-          for s in states:
+          if data.get('errors'):
+              print('Linear GraphQL errors:', data['errors'], file=sys.stderr)
+          states = (data.get('data') or {}).get('workflowStates') or {}
+          nodes = states.get('nodes') or []
+          for s in nodes:
               if s['name'].lower() == 'qa':
                   print(s['id'])
                   break
           ")
 
-          DONE_STATE_ID=$(echo $WORKFLOW_STATES | python3 -c "
+          DONE_STATE_ID=$(echo "$WORKFLOW_STATES" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          states = data['data']['workflowStates']['nodes']
-          for s in states:
+          states = (data.get('data') or {}).get('workflowStates') or {}
+          nodes = states.get('nodes') or []
+          for s in nodes:
               if s['name'].lower() == 'done':
                   print(s['id'])
                   break
@@ -82,7 +84,8 @@ jobs:
           echo "Done state ID: $DONE_STATE_ID"
 
           if [ -z "$DONE_STATE_ID" ]; then
-            echo "Could not find Done state. Exiting."
+            echo "Could not find Done state (nodes vacío o nombre de equipo incorrecto)."
+            echo "Configura en el repo: Settings → Variables → LINEAR_TEAM_NAME = nombre exacto del equipo en Linear."
             exit 1
           fi
 

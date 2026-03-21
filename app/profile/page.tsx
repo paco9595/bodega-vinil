@@ -16,7 +16,8 @@ export default async function ProfilePage() {
     const artistCounts: Record<string, number> = {}
     let oldestCollectionDate: Date | null = null
 
-    ownedVinyls.forEach((vinyl) => {
+    // for...of (no forEach) para que TypeScript rastree asignaciones a `oldestCollectionDate` en el build
+    for (const vinyl of ownedVinyls) {
         if (vinyl.artist) {
             artistCounts[vinyl.artist] = (artistCounts[vinyl.artist] || 0) + 1
         }
@@ -32,12 +33,12 @@ export default async function ProfilePage() {
         releaseData?.genres?.forEach((genre) => {
             genreCounts[genre] = (genreCounts[genre] || 0) + 1
         })
-    })
+    }
 
     const favoriteGenre = Object.entries(genreCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "Sin datos"
     const topArtist = Object.entries(artistCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "Sin datos"
     const collectionYears = oldestCollectionDate
-        ? Math.max(1, new Date().getFullYear() - oldestCollectionDate.getFullYear())
+        ? Math.max(1, new Date().getFullYear() - oldestCollectionDate?.getFullYear())
         : null
 
     const initialName = user?.user_metadata?.full_name || user?.user_metadata?.name || ""

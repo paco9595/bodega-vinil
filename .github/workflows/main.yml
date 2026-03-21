@@ -18,12 +18,20 @@ jobs:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+          # La rama suele ser vin-20-... o similar y no siempre está en título/body
+          PR_HEAD_REF: ${{ github.head_ref }}
         run: |
-          # Extraer IDs de tickets del title + body del PR (formato VIN-XX)
-          TICKET_IDS=$(echo "$PR_TITLE $PR_BODY" | grep -oE 'VIN-[0-9]+' | sort -u)
+          # Extraer VIN-XX de: título, cuerpo y nombre de rama (case-insensitive)
+          # Antes solo se buscaba VIN- mayúscula en title+body → muchos PRs no coincidían
+          COMBINED="${PR_TITLE:-} ${PR_BODY:-} ${PR_HEAD_REF:-}"
+          echo "PR_HEAD_REF=${PR_HEAD_REF:-}"
+          echo "PR_TITLE (preview): $(echo "${PR_TITLE:-}" | head -c 120)..."
 
-          if [ -z "$TICKET_IDS" ]; then
-            echo "No Linear tickets found in PR. Skipping."
+          TICKET_IDS=$(echo "$COMBINED" | grep -oEi 'vin-[0-9]+' | sort -u | sed -E 's/^[vV][iI][nN]-/VIN-/') || true
+
+          if [ -z "${TICKET_IDS:-}" ]; then
+            echo "No Linear tickets found (buscando vin-XX en título, body y rama). Skipping."
+            echo "Tip: incluye el id en el título (ej. VIN-20) o usa una rama tipo vin-20-descripcion."
             exit 0
           fi
 

@@ -1,10 +1,10 @@
 import { Disc, Heart, Search, User } from "lucide-react";
 import Link from "next/link";
 import AvatarUser from "./avatarUser";
-import useServerUser from "@/hooks/useServerUser";
+import getServerUser from "@/hooks/useServerUser";
 
 export default async function Sidebar() {
-    const { user } = await useServerUser()
+    const { user } = await getServerUser()
     return (
         <div className="w-64 border-r px-4 py-6 hidden md:flex border-white/10 backdrop-blur-xl sticky top-0 h-screen flex-col">
             <Link href="/collection" className="flex items-center gap-2 font-bold text-xl">

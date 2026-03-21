@@ -1,16 +1,17 @@
 name: Move Linear QA tickets to Done on PR to main
 
+# Solo después del merge a main (no al abrir ni al pushear al PR)
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [closed]
     branches:
       - main
 
 jobs:
   linear-update:
     runs-on: ubuntu-latest
-    # Solo si el PR viene de develop
-    if: github.head_ref == 'develop' || startsWith(github.head_ref, 'release/')
+    # Solo si el PR se fusionó (no si se cerró sin merge) y viene de develop o release/*
+    if: github.event.pull_request.merged == true && (github.head_ref == 'develop' || startsWith(github.head_ref, 'release/'))
     permissions:
       contents: read
       pull-requests: read

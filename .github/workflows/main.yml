@@ -1,0 +1,129 @@
+name: Move Linear QA tickets to Done on PR to main
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  linear-update:
+    runs-on: ubuntu-latest
+    # Solo si el PR viene de develop
+    if: github.head_ref == 'develop' || startsWith(github.head_ref, 'release/')
+
+    steps:
+      - name: Find Linear tickets and move QA → Done
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Extraer IDs de tickets del title + body del PR (formato VIN-XX)
+          TICKET_IDS=$(echo "$PR_TITLE $PR_BODY" | grep -oE 'VIN-[0-9]+' | sort -u)
+
+          if [ -z "$TICKET_IDS" ]; then
+            echo "No Linear tickets found in PR. Skipping."
+            exit 0
+          fi
+
+          echo "Found tickets: $TICKET_IDS"
+
+          # Obtener el ID del estado "Done" y "QA" via Linear API
+          WORKFLOW_STATES=$(curl -s -X POST \
+            -H "Authorization: $LINEAR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "{ workflowStates(filter: { team: { name: { eq: \"Viniy collection\" } } }) { nodes { id name type } } }"
+            }' \
+            https://api.linear.app/graphql)
+
+          echo "Workflow states: $WORKFLOW_STATES"
+
+          QA_STATE_ID=$(echo $WORKFLOW_STATES | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          states = data['data']['workflowStates']['nodes']
+          for s in states:
+              if s['name'].lower() == 'qa':
+                  print(s['id'])
+                  break
+          ")
+
+          DONE_STATE_ID=$(echo $WORKFLOW_STATES | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          states = data['data']['workflowStates']['nodes']
+          for s in states:
+              if s['name'].lower() == 'done':
+                  print(s['id'])
+                  break
+          ")
+
+          echo "QA state ID: $QA_STATE_ID"
+          echo "Done state ID: $DONE_STATE_ID"
+
+          if [ -z "$DONE_STATE_ID" ]; then
+            echo "Could not find Done state. Exiting."
+            exit 1
+          fi
+
+          # Para cada ticket encontrado
+          for TICKET_ID in $TICKET_IDS; do
+            echo "Processing $TICKET_ID..."
+
+            # Obtener el estado actual del ticket
+            ISSUE_DATA=$(curl -s -X POST \
+              -H "Authorization: $LINEAR_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"query\": \"{ issue(id: \\\"$TICKET_ID\\\") { id state { id name } } }\"
+              }" \
+              https://api.linear.app/graphql)
+
+            CURRENT_STATE=$(echo $ISSUE_DATA | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          issue = data.get('data', {}).get('issue')
+          if issue:
+              print(issue['state']['name'])
+          ")
+
+            ISSUE_UUID=$(echo $ISSUE_DATA | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          issue = data.get('data', {}).get('issue')
+          if issue:
+              print(issue['id'])
+          ")
+
+            echo "$TICKET_ID current state: $CURRENT_STATE"
+
+            # Solo mover si está en QA
+            if [ "$CURRENT_STATE" = "QA" ]; then
+              echo "Moving $TICKET_ID from QA to Done..."
+
+              UPDATE_RESULT=$(curl -s -X POST \
+                -H "Authorization: $LINEAR_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"query\": \"mutation { issueUpdate(id: \\\"$ISSUE_UUID\\\", input: { stateId: \\\"$DONE_STATE_ID\\\" }) { success issue { id state { name } } } }\"
+                }" \
+                https://api.linear.app/graphql)
+
+              SUCCESS=$(echo $UPDATE_RESULT | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          print(data.get('data', {}).get('issueUpdate', {}).get('success', False))
+          ")
+
+              if [ "$SUCCESS" = "True" ]; then
+                echo "✅ $TICKET_ID moved to Done"
+              else
+                echo "❌ Failed to update $TICKET_ID: $UPDATE_RESULT"
+              fi
+            else
+              echo "⏭️ $TICKET_ID is in '$CURRENT_STATE', not QA. Skipping."
+            fi
+          done
+- Generalized shared links

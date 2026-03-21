@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     # Solo si el PR viene de develop
     if: github.head_ref == 'develop' || startsWith(github.head_ref, 'release/')
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Find Linear tickets and move QA → Done
@@ -20,18 +23,42 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           # La rama suele ser vin-20-... o similar y no siempre está en título/body
           PR_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Extraer VIN-XX de: título, cuerpo y nombre de rama (case-insensitive)
-          # Antes solo se buscaba VIN- mayúscula en title+body → muchos PRs no coincidían
-          COMBINED="${PR_TITLE:-} ${PR_BODY:-} ${PR_HEAD_REF:-}"
+          # Extraer VIN-XX de: título, body, rama y mensajes de commit del PR
+          # PR develop→main: head_ref es "develop" sin ticket; los commits suelen traer VIN-XX
+          COMMIT_TEXT=""
+          COMMITS_JSON=$(curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPO}/pulls/${PR_NUMBER}/commits?per_page=100")
+
+          COMMIT_TEXT=$(echo "$COMMITS_JSON" | python3 -c "
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              if isinstance(data, dict) and data.get('message') == 'Not Found':
+                  sys.exit(0)
+              if not isinstance(data, list):
+                  sys.exit(0)
+              for c in data:
+                  print(c.get('commit', {}).get('message', '') or '')
+          except Exception:
+              pass
+          ")
+
+          COMBINED="${PR_TITLE:-} ${PR_BODY:-} ${PR_HEAD_REF:-} ${COMMIT_TEXT}"
           echo "PR_HEAD_REF=${PR_HEAD_REF:-}"
           echo "PR_TITLE (preview): $(echo "${PR_TITLE:-}" | head -c 120)..."
+          echo "Commit messages (preview): $(echo "${COMMIT_TEXT}" | tr '\n' ' ' | head -c 200)..."
 
           TICKET_IDS=$(echo "$COMBINED" | grep -oEi 'vin-[0-9]+' | sort -u | sed -E 's/^[vV][iI][nN]-/VIN-/') || true
 
           if [ -z "${TICKET_IDS:-}" ]; then
-            echo "No Linear tickets found (buscando vin-XX en título, body y rama). Skipping."
-            echo "Tip: incluye el id en el título (ej. VIN-20) o usa una rama tipo vin-20-descripcion."
+            echo "No Linear tickets found (título, body, rama ni commits del PR). Skipping."
+            echo "Tip: menciona VIN-XX en el título del PR o en al menos un mensaje de commit."
             exit 0
           fi
 

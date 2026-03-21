@@ -126,4 +126,3 @@ jobs:
               echo "⏭️ $TICKET_ID is in '$CURRENT_STATE', not QA. Skipping."
             fi
           done
-- Generalized shared links

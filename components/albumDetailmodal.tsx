@@ -2,7 +2,8 @@
 
 import { getTracks, getArtistReleases } from "@/lib/tracklist";
 import { Artist, DiscogsRelease } from "@/lib/types/DiscogsRelease";
-import { Check, Heart, Plus, Share2, X } from "lucide-react";
+import { Check, Heart, Plus, Share2, X, ExternalLink } from "lucide-react";
+import Link from 'next/link';
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { DrawerClose, DrawerDescription, DrawerTitle } from "./ui/drawer";
@@ -124,19 +125,33 @@ export default function AlbumDetailModal({ album, initialInCollection, initialIn
                                 setInWishlist(!inWishlist);
                                 addToCollectionFromSearch(album.id, false);
                             }}
-                            className={`p-4 rounded-2xl transition-colors ${inWishlist
+                            className={`p-4 rounded-2xl transition-colors flex items-center justify-center ${inWishlist
                                 ? 'bg-red-500 text-white'
                                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                                 }`}
                         >
                             <Heart className="w-5 h-5" fill={inWishlist ? 'currentColor' : 'none'} />
                         </button>
-                        <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors">
+                        <Link 
+                            href={`/collection/album/${album.id}`}
+                            className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors flex items-center justify-center"
+                        >
+                            <ExternalLink className="w-5 h-5" />
+                        </Link>
+                        <button className="p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors flex items-center justify-center">
                             <Share2 className="w-5 h-5" />
                         </button>
                     </div>
                 ) : (
-                    <div className="h-24"></div>
+                    <div className="flex gap-3 my-8 px-8">
+                        <Link 
+                            href={`/collection/album/${album.id}`}
+                            className="flex-1 p-4 bg-zinc-800 text-zinc-300 rounded-2xl hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <ExternalLink className="w-5 h-5" />
+                            <span>Ver detalles del álbum</span>
+                        </Link>
+                    </div>
                 )}
             </div>
             {/* Tracklist / Releases Section */}

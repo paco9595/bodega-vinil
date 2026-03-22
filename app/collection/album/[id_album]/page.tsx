@@ -2,8 +2,10 @@ import { getRelease } from "@/lib/discogs";
 import Image from "next/image";
 import { Disc, Music, PlayCircle } from "lucide-react";
 import { createAdminClient } from "@/utils/supabase/server";
+import { SpotifyAlbumEmbed } from "@/components/SpotifyAlbumEmbed";
 
 // Type for album display data (subset of full Vinyl type)
+
 type AlbumData = {
     title: string
     artist: string
@@ -98,7 +100,11 @@ export default async function AlbumPage({ params }: { params: Promise<{ id_album
 
             {/* Tracklist Section */}
             <div className="container mx-auto px-4 py-12">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                {albumData?.artist && albumData?.title && (
+                    <SpotifyAlbumEmbed artist={albumData.artist} album={albumData.title} />
+                )}
+
+                <h2 className="text-2xl font-bold mb-6 mt-12 flex items-center gap-2">
                     <Music className="w-6 h-6 text-primary" />
                     Tracklist
                 </h2>

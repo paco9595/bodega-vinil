@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Para la integración con Spotify, necesitas crear una aplicación en el [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) y añadir las siguientes variables a tu archivo `.env.local` o `.env`:
+
+```env
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+```
+
 ## Getting Started
 
 First, run the development server:
